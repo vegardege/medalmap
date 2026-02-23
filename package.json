@@ -26,8 +26,12 @@
     "url": "https://github.com/vegardege/medalmap/issues"
   },
   "homepage": "https://github.com/vegardege/medalmap#readme",
+  "dependencies": {
+    "preact": "^10.28.4"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.4.4",
+    "@preact/preset-vite": "^2.10.3",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
