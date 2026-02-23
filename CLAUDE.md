@@ -27,10 +27,12 @@ medalmap/
 │   ├── wikipedia.ts            # Fetch medal tables from Wikipedia
 │   ├── wikidata.ts             # SPARQL queries for athlete metadata + coordinates
 │   ├── coverage.ts             # Print missing data / conflicts (no side effects)
-│   ├── merge.ts                # Combine all sources → data/data.json
-│   └── overrides.json          # Manual corrections and gap-filling
+│   └── merge.ts                # Combine all sources → data/data.json
 ├── data/
-│   └── data.json               # Generated merged output — committed to repo
+│   ├── wikipedia.json          # Data retrieved from Wikipedia
+│   ├── wikidata.json           # Data retrieved from Wikidata
+│   └── overrides.json          # Manual corrections and gap-filling
+│   ├── data.json               # Generated merged output, used by web app
 ├── src/
 │   ├── main.tsx
 │   ├── App.tsx
@@ -51,30 +53,24 @@ medalmap/
 
 ## Data Schema
 
-`data/data.json` contains two normalized collections to avoid repeating athlete info across multiple medals:
+`data/data.json` is an `Athlete[]`. Each athlete carries their own medals, so there are no foreign keys to maintain:
 
 ```ts
-interface Athlete {
-  id: string;                           // stable slug, e.g. "sofia-goggia"
-  name: string;
-  birthPlace: string | null;            // human-readable city/country
-  birthCoords: [number, number] | null; // [longitude, latitude]
-}
-
 interface Medal {
   id: string;                           // e.g. "sofia-goggia-2026-downhill-gold"
-  athleteId: string;                    // ref to Athlete.id
   country: string;                      // IOC 3-letter code at time of competition
   sport: string;                        // e.g. "Alpine Skiing"
   discipline: string;                   // e.g. "Downhill"
   event: string;                        // e.g. "Women's Downhill"
   medal: "gold" | "silver" | "bronze";
   year: number;
-  olympics: string;                     // e.g. "2026-winter"
 }
 
-interface Data {
-  athletes: Athlete[];
+interface Athlete {
+  id: string;                           // stable slug, e.g. "sofia-goggia"
+  name: string;
+  birthPlace: string | null;            // human-readable city/country
+  birthCoords: [number, number] | null; // [longitude, latitude]
   medals: Medal[];
 }
 ```
