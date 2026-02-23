@@ -9,9 +9,9 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "test": "vitest",
-    "pipeline:scrape": "tsx scripts/scrape-wikipedia.ts",
-    "pipeline:wikidata": "tsx scripts/query-wikidata.ts",
-    "pipeline:diff": "tsx scripts/diff-report.ts",
+    "pipeline:wikipedia": "tsx scripts/wikipedia.ts",
+    "pipeline:wikidata": "tsx scripts/wikidata.ts",
+    "pipeline:coverage": "tsx scripts/coverage.ts",
     "pipeline:merge": "tsx scripts/merge.ts"
   },
   "repository": {

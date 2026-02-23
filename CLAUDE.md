@@ -24,9 +24,9 @@ Interactive static web app showing where Winter Olympic medalists were born, vis
 ```
 medalmap/
 ├── scripts/                    # Data pipeline — run manually, not part of build
-│   ├── scrape-wikipedia.ts     # Fetch medal tables from Wikipedia
-│   ├── query-wikidata.ts       # SPARQL queries for athlete metadata + coordinates
-│   ├── diff-report.ts          # Print missing data / conflicts (no side effects)
+│   ├── wikipedia.ts            # Fetch medal tables from Wikipedia
+│   ├── wikidata.ts             # SPARQL queries for athlete metadata + coordinates
+│   ├── coverage.ts             # Print missing data / conflicts (no side effects)
 │   ├── merge.ts                # Combine all sources → data/data.json
 │   └── overrides.json          # Manual corrections and gap-filling
 ├── data/
@@ -86,10 +86,10 @@ interface Data {
 Scripts are run manually to regenerate `data/data.json`. They are **not** part of `npm run build`.
 
 ```bash
-npm run pipeline:scrape    # → scripts/scrape-wikipedia.ts
-npm run pipeline:wikidata  # → scripts/query-wikidata.ts
-npm run pipeline:diff      # → scripts/diff-report.ts  (stdout only, no writes)
-npm run pipeline:merge     # → scripts/merge.ts  → writes data/data.json
+npm run pipeline:wikipedia  # → scripts/wikipedia.ts
+npm run pipeline:wikidata   # → scripts/wikidata.ts
+npm run pipeline:coverage   # → scripts/coverage.ts  (stdout only, no writes)
+npm run pipeline:merge      # → scripts/merge.ts  → writes data/data.json
 ```
 
 **Merge priority** (highest to lowest): `overrides.json` > Wikipedia > Wikidata
@@ -169,9 +169,9 @@ npm run preview           # Preview dist/ locally
 npm run check             # Biome lint + format check
 npm run check:fix         # Biome autofix
 
-npm run pipeline:scrape
+npm run pipeline:wikipedia
 npm run pipeline:wikidata
-npm run pipeline:diff
+npm run pipeline:coverage
 npm run pipeline:merge
 ```
 

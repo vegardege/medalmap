@@ -1,0 +1,28 @@
+:root {
+  --color-gold: #d4af37;
+  --color-silver: #a8a9ad;
+  --color-bronze: #cd7f32;
+  --bg: #1a1a2e;
+  --text: #f0f0f0;
+  --radius: 8px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
