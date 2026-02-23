@@ -1,0 +1,36 @@
+{
+  "name": "medalmap",
+  "version": "1.0.0",
+  "description": "Web app showing were Olympic medalists were born.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "test": "vitest",
+    "pipeline:scrape": "tsx scripts/scrape-wikipedia.ts",
+    "pipeline:wikidata": "tsx scripts/query-wikidata.ts",
+    "pipeline:diff": "tsx scripts/diff-report.ts",
+    "pipeline:merge": "tsx scripts/merge.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vegardege/medalmap.git"
+  },
+  "keywords": [],
+  "author": "Vegard Egeland",
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/vegardege/medalmap/issues"
+  },
+  "homepage": "https://github.com/vegardege/medalmap#readme",
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.4",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  }
+}
