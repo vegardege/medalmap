@@ -21,8 +21,29 @@ export interface WikipediaEntry {
   year: number;
   sport: string;
   event: string;
-  country: string;
+  category: "men" | "women" | "mixed";
   medal: "gold" | "silver" | "bronze";
+  country: string;
+}
+
+// Derive event category from an mw-heading (h3/h4) text.
+// Must check "women" before "men" — "women" contains the substring "men".
+function parseCategoryHeading(text: string): "men" | "women" | "mixed" | null {
+  const lower = text.toLowerCase();
+  if (lower.includes("women")) return "women";
+  if (lower.includes("men")) return "men";
+  if (lower.includes("mixed")) return "mixed";
+  return null;
+}
+
+// Derive event category from the event name for sports with no category
+// sub-headings (e.g. Bobsleigh, Curling, Figure skating).
+// Must check "women"/"woman" before "men"/"man" for the same substring reason.
+function categoryFromEventName(event: string): "men" | "women" | "mixed" {
+  const lower = event.toLowerCase();
+  if (lower.includes("women") || lower.includes("woman")) return "women";
+  if (lower.includes("men") || lower.includes("man")) return "men";
+  return "mixed";
 }
 
 // Country links point to "Country at the Year Olympics" pages
@@ -39,8 +60,6 @@ function athleteId(link: HTMLElement): string {
 // Parse one medal cell (gold / silver / bronze), returning one WikipediaEntry
 // per athlete. All context needed for the final entry is passed in.
 //
-// Adds athlete name, Wikipedia page title, and country they competed for.
-//
 // Two formats exist depending on whether it's a team or individual event:
 //   Individual: [athlete] [country] [athlete] [country] ...  (athlete before country)
 //   Team:       [country] [athlete] [athlete] [country] ...  (country before athletes)
@@ -52,6 +71,7 @@ function parseMedalCell(
   year: number,
   sport: string,
   event: string,
+  category: "men" | "women" | "mixed",
   medal: "gold" | "silver" | "bronze",
 ): WikipediaEntry[] {
   if (cell.classList.contains("table-na")) return [];
@@ -85,8 +105,9 @@ function parseMedalCell(
           year,
           sport,
           event,
-          country,
+          category,
           medal,
+          country,
         });
       }
     }
@@ -104,8 +125,9 @@ function parseMedalCell(
         year,
         sport,
         event,
-        country: country.name,
+        category,
         medal,
+        country: country.name,
       });
     }
   }
@@ -130,13 +152,14 @@ function parseEventName(cell: HTMLElement): string {
 
 // Parse all entries in a medal table.
 //
-// Adds event name.
-//
-// Tables have columns for event, gold, silver, bronse, and one row per event.
+// category is non-null when a Men's/Women's/Mixed heading was seen before this
+// table. When null (sport has no sub-headings), category is derived per row
+// from the event name.
 function parseTable(
   table: HTMLElement,
-  sport: string,
   year: number,
+  sport: string,
+  category: "men" | "women" | "mixed" | null,
 ): WikipediaEntry[] {
   const results: WikipediaEntry[] = [];
   for (const row of table.querySelectorAll("tbody tr")) {
@@ -144,10 +167,18 @@ function parseTable(
     if (cells.length < 4) continue; // header rows only have <th>
 
     const event = parseEventName(cells[0]!);
+    const rowCategory = category ?? categoryFromEventName(event);
 
     for (let i = 0; i < 3; i++) {
       results.push(
-        ...parseMedalCell(cells[i + 1]!, year, sport, event, MEDAL_TYPES[i]!),
+        ...parseMedalCell(
+          cells[i + 1]!,
+          year,
+          sport,
+          event,
+          rowCategory,
+          MEDAL_TYPES[i]!,
+        ),
       );
     }
   }
@@ -156,12 +187,17 @@ function parseTable(
 
 // Parse all entries for a single Olympics.
 //
-// Adds sport name.
+// Tracks mw-heading2 for sport and mw-heading3/4 for event category.
+// Sports that use sub-headings (Men's/Women's/Mixed) set currentCategory before
+// each table. Sports with a single flat table leave currentCategory null and
+// let parseTable derive the category from each event name instead.
 export function parseWikipediaPage(
   html: string,
   year: number,
 ): WikipediaEntry[] {
   const root = parse(html);
+  // #mw-content-text is a stable MediaWiki core element; .mw-parser-output is
+  // the direct output of the wikitext parser — both are reliable anchors.
   const content =
     root.querySelector("#mw-content-text .mw-parser-output") ??
     root.querySelector(".mw-parser-output");
@@ -169,6 +205,7 @@ export function parseWikipediaPage(
 
   const results: WikipediaEntry[] = [];
   let currentSport = "";
+  let currentCategory: "men" | "women" | "mixed" | null = null;
 
   for (const node of content.childNodes) {
     if (node.nodeType !== NodeType.ELEMENT_NODE) continue;
@@ -180,12 +217,20 @@ export function parseWikipediaPage(
       const heading = h2.text.trim();
       if (STOP_HEADINGS.has(heading)) break;
       currentSport = heading;
+      currentCategory = null;
+    } else if (
+      (el.classList.contains("mw-heading3") ||
+        el.classList.contains("mw-heading4")) &&
+      currentSport
+    ) {
+      const hEl = el.querySelector("h3") ?? el.querySelector("h4");
+      if (hEl) currentCategory = parseCategoryHeading(hEl.text.trim());
     } else if (
       el.classList.contains("wikitable") &&
       el.classList.contains("plainrowheaders") &&
       currentSport
     ) {
-      results.push(...parseTable(el, currentSport, year));
+      results.push(...parseTable(el, year, currentSport, currentCategory));
     }
   }
   return results;
