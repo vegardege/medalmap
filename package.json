@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/vegardege/medalmap#readme",
   "dependencies": {
+    "maplibre-gl": "^5.19.0",
     "preact": "^10.28.4"
   },
   "devDependencies": {
