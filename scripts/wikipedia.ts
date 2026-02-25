@@ -54,7 +54,12 @@ function isCountryLink(link: HTMLElement): boolean {
 
 function athleteId(link: HTMLElement): string {
   const href = link.getAttribute("href") ?? "";
-  return decodeURIComponent(href.replace("/wiki/", ""));
+  if (href.startsWith("/wiki/")) {
+    return decodeURIComponent(href.slice("/wiki/".length));
+  }
+  // Red link: /w/index.php?title=Page_Title&action=edit&redlink=1
+  const params = new URLSearchParams(href.split("?")[1] ?? "");
+  return params.get("title") ?? href;
 }
 
 // Parse one medal cell (gold / silver / bronze), returning one WikipediaEntry
@@ -84,7 +89,10 @@ function parseMedalCell(
     | { kind: "athlete"; id: string; name: string };
 
   const items: Item[] = links
-    .filter((link) => link.getAttribute("href")?.startsWith("/wiki/"))
+    .filter((link) => {
+      const href = link.getAttribute("href") ?? "";
+      return href.startsWith("/wiki/") || href.includes("redlink=1");
+    })
     .map((link) => {
       if (isCountryLink(link)) {
         return { kind: "country", name: link.text.trim() };
