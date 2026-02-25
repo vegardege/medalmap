@@ -164,15 +164,19 @@ function parseTable(
   const results: WikipediaEntry[] = [];
   for (const row of table.querySelectorAll("tbody tr")) {
     const cells = row.querySelectorAll("td");
-    if (cells.length < 4) continue; // header rows only have <th>
+    // Event cell is either <th scope="row"> or the first <td>
+    const eventTh = row.querySelector("th[scope='row']");
+    const eventCell = eventTh ?? cells[0];
+    const medalOffset = eventTh ? 0 : 1;
+    if (!eventCell || cells.length < medalOffset + 3) continue;
 
-    const event = parseEventName(cells[0]!);
+    const event = parseEventName(eventCell);
     const rowCategory = category ?? categoryFromEventName(event);
 
     for (let i = 0; i < 3; i++) {
       results.push(
         ...parseMedalCell(
-          cells[i + 1]!,
+          cells[medalOffset + i]!,
           year,
           sport,
           event,
@@ -241,7 +245,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const year = parseInt(process.argv[2] ?? "2026", 10);
   const url = `https://en.wikipedia.org/wiki/List_of_${year}_Winter_Olympics_medal_winners`;
 
-  console.log(`Fetching ${url}...`);
+  console.log(`Fetching ${url}`);
   const response = await fetch(url);
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
   const html = await response.text();
