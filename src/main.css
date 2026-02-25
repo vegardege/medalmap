@@ -44,8 +44,6 @@ body {
   border-radius: var(--radius);
   padding: 12px 14px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  max-height: 320px;
-  overflow-y: auto;
 }
 
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
@@ -53,15 +51,19 @@ body {
 }
 
 .maplibregl-popup-close-button {
-  color: var(--text);
+  top: 12px;
+  right: 14px;
+  padding: 0;
+  line-height: 1;
   font-size: 18px;
-  padding: 4px 8px;
+  color: var(--text);
 }
 
 /* Popup content */
 .popup-place {
   font-weight: 600;
   font-size: 0.95rem;
+  padding-right: 1.5rem;
   margin-bottom: 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
@@ -73,9 +75,30 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.popup-athletes {
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+.popup-athletes::-webkit-scrollbar {
+  width: 4px;
+}
+
+.popup-athletes::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+}
+
 .popup-name {
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+.popup-sport {
+  font-size: 0.8rem;
+  opacity: 0.6;
   margin-bottom: 4px;
 }
 
