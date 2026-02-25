@@ -44,6 +44,7 @@ body {
   border-radius: var(--radius);
   padding: 12px 14px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  width: 280px;
 }
 
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
@@ -69,10 +70,37 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
+.popup-athlete {
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: 4px;
+}
+
+.popup-athlete:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .popup-athlete + .popup-athlete {
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 6px;
+  padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.popup-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.popup-sport {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-bottom: 4px;
+}
+
+.popup-medal-strip {
+  display: flex;
+  gap: 2px;
+  font-size: 1.1em;
 }
 
 .popup-athletes {
@@ -91,19 +119,44 @@ body {
   border-radius: 2px;
 }
 
-.popup-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.popup-sport {
-  font-size: 0.8rem;
-  opacity: 0.6;
-  margin-bottom: 4px;
-}
-
 .popup-medal {
   font-size: 0.8rem;
-  opacity: 0.85;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+/* Athlete detail page */
+.popup-back {
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.popup-back:hover {
+  opacity: 0.75;
+}
+
+.popup-back-arrow {
+  opacity: 0.5;
+}
+
+.popup-wiki {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: inherit;
+  opacity: 0.5;
+  text-decoration: none;
+}
+
+.popup-wiki:hover {
+  opacity: 1;
 }
