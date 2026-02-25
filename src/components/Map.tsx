@@ -1,8 +1,10 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { bestMedal } from "../data";
 import type { Location } from "../types";
+import { AthletePopup } from "./AthletePopup";
 
 interface Props {
   locations: Location[];
@@ -21,6 +23,7 @@ function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
       type: "Feature",
       geometry: { type: "Point", coordinates: loc.coords },
       properties: {
+        coordKey: loc.coords.join(","),
         athleteCount: loc.athletes.length,
         bestMedal: bestMedal(loc.athletes.flatMap((a) => a.medals)),
       },
@@ -28,15 +31,23 @@ function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
   };
 }
 
-export function Map({ locations }: Props) {
+export function MapView({ locations }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const popupRef = useRef<maplibregl.Popup | null>(null);
 
-  // Keep a ref to locations so the map load callback always sees the latest value,
-  // even if locations changed between mount and when the style finishes loading.
+  // locationsRef: latest locations for the map.on("load") closure
+  // locationsMapRef: coord-key → Location lookup for click handlers
   const locationsRef = useRef(locations);
+  const locationsMapRef = useRef(new Map<string, Location>());
+
   useEffect(() => {
     locationsRef.current = locations;
+
+    const lut = new Map<string, Location>();
+    for (const loc of locations) lut.set(loc.coords.join(","), loc);
+    locationsMapRef.current = lut;
+
     const map = mapRef.current;
     if (!map?.isStyleLoaded()) return;
     (map.getSource("athletes") as maplibregl.GeoJSONSource)?.setData(
@@ -67,7 +78,10 @@ export function Map({ locations }: Props) {
         // Aggregate best medal across clustered features so we can color the cluster circle
         clusterProperties: {
           hasGold: ["+", ["case", ["==", ["get", "bestMedal"], "gold"], 1, 0]],
-          hasSilver: ["+", ["case", ["==", ["get", "bestMedal"], "silver"], 1, 0]],
+          hasSilver: [
+            "+",
+            ["case", ["==", ["get", "bestMedal"], "silver"], 1, 0],
+          ],
         },
       });
 
@@ -155,13 +169,71 @@ export function Map({ locations }: Props) {
         id: "marker-count",
         type: "symbol",
         source: "athletes",
-        filter: ["all", ["!", ["has", "point_count"]], [">", ["get", "athleteCount"], 1]],
+        filter: [
+          "all",
+          ["!", ["has", "point_count"]],
+          [">", ["get", "athleteCount"], 1],
+        ],
         layout: {
           "text-field": ["get", "athleteCount"],
           "text-size": 10,
           "text-font": ["Noto Sans Bold"],
         },
         paint: { "text-color": "#000000" },
+      });
+
+      // Click individual marker → show popup
+      map.on("click", "marker-circle", (e) => {
+        const feature = e.features?.[0];
+        if (!feature) return;
+        const coords = (feature.geometry as GeoJSON.Point).coordinates as [
+          number,
+          number,
+        ];
+        const key = feature.properties?.["coordKey"] as string;
+        const location = locationsMapRef.current.get(key);
+        if (!location) return;
+
+        const node = document.createElement("div");
+        render(<AthletePopup location={location} />, node);
+
+        popupRef.current?.remove();
+        popupRef.current = new maplibregl.Popup({
+          maxWidth: "300px",
+          anchor: "bottom",
+        })
+          .setLngLat(coords)
+          .setDOMContent(node)
+          .addTo(map);
+      });
+
+      // Click cluster → zoom in to expand it
+      map.on("click", "cluster-circle", (e) => {
+        const feature = e.features?.[0];
+        if (!feature?.properties) return;
+        const clusterId = feature.properties["cluster_id"] as number;
+        const coords = (feature.geometry as GeoJSON.Point).coordinates as [
+          number,
+          number,
+        ];
+        (map.getSource("athletes") as maplibregl.GeoJSONSource)
+          .getClusterExpansionZoom(clusterId)
+          .then((zoom) => map.flyTo({ center: coords, zoom: zoom + 1 }))
+          .catch(() => {});
+      });
+
+      // Pointer cursor on hover
+      map.on("mouseenter", "marker-circle", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "marker-circle", () => {
+        map.getCanvas().style.cursor = "";
+      });
+      map.on("mouseenter", "cluster-circle", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "cluster-circle", () => {
+        map.getCanvas().style.cursor = "";
       });
     });
 

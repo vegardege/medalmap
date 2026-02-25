@@ -36,3 +36,51 @@ body {
 .map-container {
   flex: 1;
 }
+
+/* MapLibre popup — override defaults to match dark theme */
+.maplibregl-popup-content {
+  background: var(--bg);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--bg);
+}
+
+.maplibregl-popup-close-button {
+  color: var(--text);
+  font-size: 18px;
+  padding: 4px 8px;
+}
+
+/* Popup content */
+.popup-place {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.popup-athlete + .popup-athlete {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.popup-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.popup-medal {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  line-height: 1.5;
+}
