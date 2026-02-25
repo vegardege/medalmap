@@ -1,9 +1,48 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "preact/hooks";
+import { bestMedal } from "../data";
+import type { Location } from "../types";
 
-export function Map() {
+interface Props {
+  locations: Location[];
+}
+
+const MEDAL_COLORS = {
+  gold: "#d4af37",
+  silver: "#a8a9ad",
+  bronze: "#cd7f32",
+};
+
+function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: locations.map((loc) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: loc.coords },
+      properties: {
+        athleteCount: loc.athletes.length,
+        bestMedal: bestMedal(loc.athletes.flatMap((a) => a.medals)),
+      },
+    })),
+  };
+}
+
+export function Map({ locations }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+
+  // Keep a ref to locations so the map load callback always sees the latest value,
+  // even if locations changed between mount and when the style finishes loading.
+  const locationsRef = useRef(locations);
+  useEffect(() => {
+    locationsRef.current = locations;
+    const map = mapRef.current;
+    if (!map?.isStyleLoaded()) return;
+    (map.getSource("athletes") as maplibregl.GeoJSONSource)?.setData(
+      toGeoJSON(locations),
+    );
+  }, [locations]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -17,7 +56,120 @@ export function Map() {
 
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
-    return () => map.remove();
+    map.on("load", () => {
+      map.addSource("athletes", {
+        type: "geojson",
+        data: toGeoJSON(locationsRef.current),
+        // Only cluster dots that are literally touching on screen (~1 marker diameter)
+        cluster: true,
+        clusterRadius: 20,
+        clusterMaxZoom: 14,
+        // Aggregate best medal across clustered features so we can color the cluster circle
+        clusterProperties: {
+          hasGold: ["+", ["case", ["==", ["get", "bestMedal"], "gold"], 1, 0]],
+          hasSilver: ["+", ["case", ["==", ["get", "bestMedal"], "silver"], 1, 0]],
+        },
+      });
+
+      // Cluster circle colored by the best medal among its members
+      map.addLayer({
+        id: "cluster-circle",
+        type: "circle",
+        source: "athletes",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-radius": 10,
+          "circle-color": [
+            "case",
+            [">", ["get", "hasGold"], 0],
+            MEDAL_COLORS.gold,
+            [">", ["get", "hasSilver"], 0],
+            MEDAL_COLORS.silver,
+            MEDAL_COLORS.bronze,
+          ],
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#000",
+        },
+      });
+
+      // Count label inside the cluster circle
+      map.addLayer({
+        id: "cluster-count",
+        type: "symbol",
+        source: "athletes",
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": ["get", "point_count_abbreviated"],
+          "text-size": 11,
+          "text-font": ["Noto Sans Bold"],
+        },
+        paint: { "text-color": "#000000" },
+      });
+
+      // Soft glow behind each individual marker in the same medal color
+      map.addLayer({
+        id: "marker-glow",
+        type: "circle",
+        source: "athletes",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-radius": 16,
+          "circle-opacity": 0.25,
+          "circle-blur": 0.5,
+          "circle-color": [
+            "match",
+            ["get", "bestMedal"],
+            "gold",
+            MEDAL_COLORS.gold,
+            "silver",
+            MEDAL_COLORS.silver,
+            MEDAL_COLORS.bronze,
+          ],
+        },
+      });
+
+      // One dot per unique birth location, colored by best medal there
+      map.addLayer({
+        id: "marker-circle",
+        type: "circle",
+        source: "athletes",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-radius": 10,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#000",
+          "circle-color": [
+            "match",
+            ["get", "bestMedal"],
+            "gold",
+            MEDAL_COLORS.gold,
+            "silver",
+            MEDAL_COLORS.silver,
+            MEDAL_COLORS.bronze,
+          ],
+        },
+      });
+
+      // Count label on individual markers with more than one athlete
+      map.addLayer({
+        id: "marker-count",
+        type: "symbol",
+        source: "athletes",
+        filter: ["all", ["!", ["has", "point_count"]], [">", ["get", "athleteCount"], 1]],
+        layout: {
+          "text-field": ["get", "athleteCount"],
+          "text-size": 10,
+          "text-font": ["Noto Sans Bold"],
+        },
+        paint: { "text-color": "#000000" },
+      });
+    });
+
+    mapRef.current = map;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
   }, []);
 
   return <div class="map-container" ref={containerRef} />;
