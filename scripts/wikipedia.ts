@@ -83,12 +83,14 @@ function parseMedalCell(
     | { kind: "country"; name: string }
     | { kind: "athlete"; id: string; name: string };
 
-  const items: Item[] = links.map((link) => {
-    if (isCountryLink(link)) {
-      return { kind: "country", name: link.text.trim() };
-    }
-    return { kind: "athlete", id: athleteId(link), name: link.text.trim() };
-  });
+  const items: Item[] = links
+    .filter((link) => link.getAttribute("href")?.startsWith("/wiki/"))
+    .map((link) => {
+      if (isCountryLink(link)) {
+        return { kind: "country", name: link.text.trim() };
+      }
+      return { kind: "athlete", id: athleteId(link), name: link.text.trim() };
+    });
 
   const results: WikipediaEntry[] = [];
 
