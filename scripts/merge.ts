@@ -84,7 +84,28 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       country: e.country,
     }));
 
-    // Priority: override > wikipedia > wikidata
+    // Warn when an override targets a field that Wikidata now has a value for.
+    // Overrides are meant to fill gaps; if Wikidata caught up the override may
+    // be redundant, or (if values differ) worth investigating.
+    if (ov && wd) {
+      for (const field of ["birthPlace", "birthCoords"] as const) {
+        if (ov[field] !== undefined && wd[field] != null) {
+          const ovVal = JSON.stringify(ov[field]);
+          const wdVal = JSON.stringify(wd[field]);
+          if (ovVal === wdVal) {
+            console.warn(
+              `merge: "${id}" override ${field} matches Wikidata — may be redundant`,
+            );
+          } else {
+            console.warn(
+              `merge: "${id}" override ${field} ${ovVal} differs from Wikidata ${wdVal}`,
+            );
+          }
+        }
+      }
+    }
+
+    // Priority: override > wikidata
     athletes.push({
       id,
       name: ov?.name ?? entries[0]!.name,
