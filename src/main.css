@@ -26,3 +26,13 @@ body {
   color: var(--text);
   font-family: system-ui, sans-serif;
 }
+
+/* Layout */
+.app {
+  display: flex;
+  height: 100%;
+}
+
+.map-container {
+  flex: 1;
+}

@@ -1,3 +1,9 @@
+import { Map } from "./components/Map";
+
 export function App() {
-  return <h1>Medal Map</h1>;
+  return (
+    <div class="app">
+      <Map />
+    </div>
+  );
 }
