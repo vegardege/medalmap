@@ -6,7 +6,9 @@ const MEDAL_ORDER = { gold: 0, silver: 1, bronze: 2 } as const;
 const CATEGORY_LABEL = { men: "Men", women: "Women", mixed: "Mixed" } as const;
 
 function sortedMedals(medals: Athlete["medals"]) {
-  return [...medals].sort((a, b) => MEDAL_ORDER[a.medal] - MEDAL_ORDER[b.medal]);
+  return [...medals].sort(
+    (a, b) => MEDAL_ORDER[a.medal] - MEDAL_ORDER[b.medal],
+  );
 }
 
 function countMedal(athlete: Athlete, type: "gold" | "silver" | "bronze") {
@@ -46,7 +48,13 @@ function WikipediaIcon() {
   );
 }
 
-function AthleteRow({ athlete, onSelect }: { athlete: Athlete; onSelect: () => void }) {
+function AthleteRow({
+  athlete,
+  onSelect,
+}: {
+  athlete: Athlete;
+  onSelect: () => void;
+}) {
   const medals = sortedMedals(athlete.medals);
   return (
     <div class="popup-athlete" onClick={onSelect}>
@@ -54,7 +62,9 @@ function AthleteRow({ athlete, onSelect }: { athlete: Athlete; onSelect: () => v
       <div class="popup-sport">{getSport(athlete)}</div>
       <div class="popup-medal-strip">
         {medals.map((medal) => (
-          <span key={`${medal.year}-${medal.event}`}>{MEDAL_EMOJI[medal.medal]}</span>
+          <span key={`${medal.year}-${medal.event}`}>
+            {MEDAL_EMOJI[medal.medal]}
+          </span>
         ))}
       </div>
     </div>
@@ -75,7 +85,7 @@ function AthleteDetail({
 
   return (
     <div class="athlete-popup">
-      <button class="popup-place popup-back" onClick={onBack}>
+      <button type="button" class="popup-place popup-back" onClick={onBack}>
         <span class="popup-back-arrow">←</span> {placeName}
       </button>
       <div class="popup-name">{athlete.name}</div>
@@ -83,11 +93,17 @@ function AthleteDetail({
       <div class="popup-medals">
         {medals.map((medal) => (
           <div class="popup-medal" key={`${medal.year}-${medal.event}`}>
-            {MEDAL_EMOJI[medal.medal]} {medal.event} · {CATEGORY_LABEL[medal.category]}
+            {MEDAL_EMOJI[medal.medal]} {medal.event} ·{" "}
+            {CATEGORY_LABEL[medal.category]}
           </div>
         ))}
       </div>
-      <a class="popup-wiki" href={wikiUrl} target="_blank" rel="noopener noreferrer">
+      <a
+        class="popup-wiki"
+        href={wikiUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <WikipediaIcon /> Wikipedia
       </a>
     </div>
@@ -114,7 +130,11 @@ export function AthletePopup({ location }: { location: Location }) {
       <div class="popup-place">{placeName}</div>
       <div class="popup-athletes">
         {athletes.map((athlete) => (
-          <AthleteRow key={athlete.id} athlete={athlete} onSelect={() => setSelected(athlete)} />
+          <AthleteRow
+            key={athlete.id}
+            athlete={athlete}
+            onSelect={() => setSelected(athlete)}
+          />
         ))}
       </div>
     </div>

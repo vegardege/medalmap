@@ -42,17 +42,29 @@ export function deriveFilterOptions(athletes: Athlete[]) {
 
 // Returns athletes whose medals match all active filters.
 // An athlete passes if at least one of their medals satisfies every active dimension.
-export function filterAthletes(athletes: Athlete[], filters: FilterState): Athlete[] {
+export function filterAthletes(
+  athletes: Athlete[],
+  filters: FilterState,
+): Athlete[] {
   return athletes
     .map((athlete) => {
       const matchingMedals = athlete.medals.filter((medal) => {
-        if (filters.medals.length > 0 && !filters.medals.includes(medal.medal)) return false;
-        if (filters.sports.length > 0 && !filters.sports.includes(medal.sport)) return false;
-        if (filters.categories.length > 0 && !filters.categories.includes(medal.category))
+        if (filters.medals.length > 0 && !filters.medals.includes(medal.medal))
           return false;
-        if (filters.countries.length > 0 && !filters.countries.includes(medal.country))
+        if (filters.sports.length > 0 && !filters.sports.includes(medal.sport))
           return false;
-        if (filters.years.length > 0 && !filters.years.includes(medal.year)) return false;
+        if (
+          filters.categories.length > 0 &&
+          !filters.categories.includes(medal.category)
+        )
+          return false;
+        if (
+          filters.countries.length > 0 &&
+          !filters.countries.includes(medal.country)
+        )
+          return false;
+        if (filters.years.length > 0 && !filters.years.includes(medal.year))
+          return false;
         return true;
       });
       if (matchingMedals.length === 0) return null;
@@ -62,7 +74,9 @@ export function filterAthletes(athletes: Athlete[], filters: FilterState): Athle
 }
 
 // Gold outranks silver outranks bronze — used to color markers.
-export function bestMedal(medals: Athlete["medals"]): "gold" | "silver" | "bronze" {
+export function bestMedal(
+  medals: Athlete["medals"],
+): "gold" | "silver" | "bronze" {
   if (medals.some((m) => m.medal === "gold")) return "gold";
   if (medals.some((m) => m.medal === "silver")) return "silver";
   return "bronze";

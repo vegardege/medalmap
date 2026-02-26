@@ -81,7 +81,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
 
   console.log();
-  console.log(`${withCoords}/${totalAthletes} athletes with coordinates (${pct}%)`);
+  console.log(
+    `${withCoords}/${totalAthletes} athletes with coordinates (${pct}%)`,
+  );
 
   // Unique place names that exist but lack coordinates — a Wikidata entity problem,
   // not athlete-specific. Listed simply; expected to be rare.

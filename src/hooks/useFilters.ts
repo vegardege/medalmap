@@ -30,11 +30,17 @@ function serializeToUrl(filters: FilterState): void {
   const p = new URLSearchParams();
   if (filters.medals.length > 0) p.set("medals", filters.medals.join(","));
   if (filters.sports.length > 0) p.set("sports", filters.sports.join(","));
-  if (filters.categories.length > 0) p.set("categories", filters.categories.join(","));
-  if (filters.countries.length > 0) p.set("countries", filters.countries.join(","));
+  if (filters.categories.length > 0)
+    p.set("categories", filters.categories.join(","));
+  if (filters.countries.length > 0)
+    p.set("countries", filters.countries.join(","));
   if (filters.years.length > 0) p.set("years", filters.years.join(","));
   const search = p.toString();
-  history.replaceState(null, "", search ? `?${search}` : window.location.pathname);
+  history.replaceState(
+    null,
+    "",
+    search ? `?${search}` : window.location.pathname,
+  );
 }
 
 export function useFilters() {
