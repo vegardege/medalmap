@@ -51,21 +51,13 @@ export function useFilters() {
     serializeToUrl(filters);
   }, [filters]);
 
-  const setFilters = useCallback((next: FilterState) => {
-    setFiltersRaw(next);
-  }, []);
-
   const clearFilters = useCallback(() => {
     setFiltersRaw(EMPTY);
   }, []);
 
-  const activeCount = [
-    filters.medals,
-    filters.sports,
-    filters.categories,
-    filters.countries,
-    filters.years,
-  ].filter((arr) => arr.length > 0).length;
+  const activeCount = Object.values(filters).filter(
+    (arr) => arr.length > 0,
+  ).length;
 
-  return { filters, setFilters, clearFilters, activeCount };
+  return { filters, setFilters: setFiltersRaw, clearFilters, activeCount };
 }

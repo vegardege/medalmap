@@ -1,13 +1,9 @@
 import { useState } from "preact/hooks";
-import { allAthletes } from "../data";
+import { allAthletes, getSport } from "../data";
 import type { Athlete } from "../types";
 
 interface Props {
   onClose: () => void;
-}
-
-function getSports(athlete: Athlete): string {
-  return [...new Set(athlete.medals.map((m) => m.sport))].join(" · ");
 }
 
 function groupByCountry(athletes: Athlete[]): [string, Athlete[]][] {
@@ -35,7 +31,7 @@ function matchesSearch(athlete: Athlete, tokens: string[]): boolean {
 const missing = allAthletes.filter((a) => a.birthCoords === null);
 
 function AthleteCard({ athlete }: { athlete: Athlete }) {
-  const sport = getSports(athlete);
+  const sport = getSport(athlete);
   const wdUrl = athlete.wikidataId
     ? `https://www.wikidata.org/wiki/${athlete.wikidataId}`
     : null;

@@ -73,6 +73,16 @@ export function filterAthletes(
     .filter((a): a is Athlete => a !== null);
 }
 
+// Returns a deduplicated, joined list of sports for an athlete.
+export function getSport(athlete: Athlete): string {
+  return [...new Set(athlete.medals.map((m) => m.sport))].join(" · ");
+}
+
+// Toggles an item in an array: adds it if absent, removes it if present.
+export function toggleItem<T>(arr: T[], item: T): T[] {
+  return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
+}
+
 // Gold outranks silver outranks bronze — used to color markers.
 export function bestMedal(
   medals: Athlete["medals"],

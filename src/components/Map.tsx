@@ -10,12 +10,6 @@ interface Props {
   locations: Location[];
 }
 
-const MEDAL_COLORS = {
-  gold: "#d4af37",
-  silver: "#a8a9ad",
-  bronze: "#cd7f32",
-};
-
 function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
@@ -95,29 +89,25 @@ export function MapView({ locations }: Props) {
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
     map.on("load", async () => {
-      await Promise.all([
-        loadImage(
-          map,
-          "gold-cluster",
-          makeClusterSVG(MEDAL_COLORS.gold),
-          30,
-          30,
+      // Read medal colors from CSS custom properties — single source of truth.
+      const cssVars = getComputedStyle(document.documentElement);
+      const MEDAL_COLORS = {
+        gold: cssVars.getPropertyValue("--color-gold").trim(),
+        silver: cssVars.getPropertyValue("--color-silver").trim(),
+        bronze: cssVars.getPropertyValue("--color-bronze").trim(),
+      };
+
+      await Promise.all(
+        (["gold", "silver", "bronze"] as const).map((medal) =>
+          loadImage(
+            map,
+            `${medal}-cluster`,
+            makeClusterSVG(MEDAL_COLORS[medal]),
+            30,
+            30,
+          ),
         ),
-        loadImage(
-          map,
-          "silver-cluster",
-          makeClusterSVG(MEDAL_COLORS.silver),
-          30,
-          30,
-        ),
-        loadImage(
-          map,
-          "bronze-cluster",
-          makeClusterSVG(MEDAL_COLORS.bronze),
-          30,
-          30,
-        ),
-      ]);
+      );
 
       map.addSource("athletes", {
         type: "geojson",

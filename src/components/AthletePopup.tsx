@@ -1,4 +1,5 @@
 import { useRef, useState } from "preact/hooks";
+import { getSport } from "../data";
 import type { Athlete, Location } from "../types";
 
 const MEDAL_EMOJI = { gold: "🥇", silver: "🥈", bronze: "🥉" } as const;
@@ -22,10 +23,6 @@ function sortAthletes(athletes: Athlete[]) {
       countMedal(b, "silver") - countMedal(a, "silver") ||
       countMedal(b, "bronze") - countMedal(a, "bronze"),
   );
-}
-
-function getSport(athlete: Athlete) {
-  return [...new Set(athlete.medals.map((m) => m.sport))].join(" · ");
 }
 
 function WikipediaIcon() {

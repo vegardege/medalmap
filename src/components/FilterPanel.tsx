@@ -1,4 +1,5 @@
 import { useState } from "preact/hooks";
+import { toggleItem } from "../data";
 import type { FilterState } from "../types";
 import { FilterSection } from "./FilterSection";
 import { InfoModal } from "./InfoModal";
@@ -17,10 +18,6 @@ interface Props {
   activeCount: number;
   athleteCount: number;
   options: Options;
-}
-
-function toggleItem<T>(arr: T[], item: T): T[] {
-  return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 }
 
 export function FilterPanel({
