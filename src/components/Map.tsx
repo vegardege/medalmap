@@ -1,20 +1,20 @@
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import { render } from "preact";
-import { useEffect, useRef } from "preact/hooks";
-import { bestMedal } from "../data";
-import type { Location } from "../types";
-import { AthletePopup } from "./AthletePopup";
+import maplibregl from "maplibre-gl"
+import "maplibre-gl/dist/maplibre-gl.css"
+import { render } from "preact"
+import { useEffect, useRef } from "preact/hooks"
+import { bestMedal } from "../data"
+import type { Location } from "../types"
+import { AthletePopup } from "./AthletePopup"
 
 interface Props {
-  locations: Location[];
+  locations: Location[]
 }
 
 const MEDAL_COLORS = {
   gold: "#d4af37",
   silver: "#a8a9ad",
   bronze: "#cd7f32",
-};
+}
 
 function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
   return {
@@ -28,54 +28,86 @@ function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
         bestMedal: bestMedal(loc.athletes.flatMap((a) => a.medals)),
       },
     })),
-  };
+  }
 }
 
+// ── Cluster SVG ─────────────────────────────────────────────────
+// Plain filled circle — the count text sits where the inner dot would be
+
+function makeClusterSVG(color: string): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+    <circle cx="15" cy="15" r="13" fill="${color}" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+  </svg>`
+}
+
+function loadImage(
+  map: maplibregl.Map,
+  name: string,
+  svg: string,
+  width: number,
+  height: number,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([svg], { type: "image/svg+xml" })
+    const url = URL.createObjectURL(blob)
+    const img = new Image(width, height)
+    img.onload = () => {
+      map.addImage(name, img)
+      URL.revokeObjectURL(url)
+      resolve()
+    }
+    img.onerror = reject
+    img.src = url
+  })
+}
+
+// ── Component ───────────────────────────────────────────────────
+
 export function MapView({ locations }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const popupRef = useRef<maplibregl.Popup | null>(null);
-
-  // locationsRef: latest locations for the map.on("load") closure
-  // locationsMapRef: coord-key → Location lookup for click handlers
-  const locationsRef = useRef(locations);
-  const locationsMapRef = useRef(new Map<string, Location>());
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const popupRef = useRef<maplibregl.Popup | null>(null)
+  const locationsRef = useRef(locations)
+  const locationsMapRef = useRef(new Map<string, Location>())
 
   useEffect(() => {
-    locationsRef.current = locations;
+    locationsRef.current = locations
+    const lut = new Map<string, Location>()
+    for (const loc of locations) lut.set(loc.coords.join(","), loc)
+    locationsMapRef.current = lut
 
-    const lut = new Map<string, Location>();
-    for (const loc of locations) lut.set(loc.coords.join(","), loc);
-    locationsMapRef.current = lut;
-
-    const map = mapRef.current;
-    if (!map?.isStyleLoaded()) return;
-    (map.getSource("athletes") as maplibregl.GeoJSONSource)?.setData(
+    const map = mapRef.current
+    if (!map?.isStyleLoaded()) return
+    ;(map.getSource("athletes") as maplibregl.GeoJSONSource)?.setData(
       toGeoJSON(locations),
-    );
-  }, [locations]);
+    )
+  }, [locations])
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) return
 
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://tiles.openfreemap.org/styles/liberty",
       center: [10, 20],
       zoom: 2,
-    });
+    })
 
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(new maplibregl.NavigationControl(), "top-right")
 
-    map.on("load", () => {
+    map.on("load", async () => {
+      await Promise.all([
+        loadImage(map, "gold-cluster", makeClusterSVG(MEDAL_COLORS.gold), 30, 30),
+        loadImage(map, "silver-cluster", makeClusterSVG(MEDAL_COLORS.silver), 30, 30),
+        loadImage(map, "bronze-cluster", makeClusterSVG(MEDAL_COLORS.bronze), 30, 30),
+      ])
+
       map.addSource("athletes", {
         type: "geojson",
         data: toGeoJSON(locationsRef.current),
-        // Only cluster dots that are literally touching on screen (~1 marker diameter)
         cluster: true,
         clusterRadius: 20,
         clusterMaxZoom: 14,
-        // Aggregate best medal across clustered features so we can color the cluster circle
         clusterProperties: {
           hasGold: ["+", ["case", ["==", ["get", "bestMedal"], "gold"], 1, 0]],
           hasSilver: [
@@ -83,166 +115,119 @@ export function MapView({ locations }: Props) {
             ["case", ["==", ["get", "bestMedal"], "silver"], 1, 0],
           ],
         },
-      });
+      })
 
-      // Cluster circle colored by the best medal among its members
+      // ── Individual markers: bullseye (circle + inner dot) ───────
+
       map.addLayer({
-        id: "cluster-circle",
+        id: "marker-bullseye",
         type: "circle",
         source: "athletes",
-        filter: ["has", "point_count"],
+        filter: ["!", ["has", "point_count"]],
         paint: {
           "circle-radius": 10,
           "circle-color": [
-            "case",
-            [">", ["get", "hasGold"], 0],
-            MEDAL_COLORS.gold,
-            [">", ["get", "hasSilver"], 0],
-            MEDAL_COLORS.silver,
+            "match",
+            ["get", "bestMedal"],
+            "gold", MEDAL_COLORS.gold,
+            "silver", MEDAL_COLORS.silver,
             MEDAL_COLORS.bronze,
           ],
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#000",
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "rgba(255,255,255,0.8)",
         },
-      });
+      })
 
-      // Count label inside the cluster circle
       map.addLayer({
-        id: "cluster-count",
+        id: "marker-bullseye-dot",
+        type: "circle",
+        source: "athletes",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-radius": 3,
+          "circle-color": "rgba(255,255,255,0.7)",
+        },
+      })
+
+      // ── Clusters: single symbol layer so circle + count stay in sync ──
+
+      map.addLayer({
+        id: "cluster-bullseye",
         type: "symbol",
         source: "athletes",
         filter: ["has", "point_count"],
         layout: {
+          "icon-image": [
+            "case",
+            [">", ["get", "hasGold"], 0], "gold-cluster",
+            [">", ["get", "hasSilver"], 0], "silver-cluster",
+            "bronze-cluster",
+          ],
+          "icon-allow-overlap": true,
           "text-field": ["get", "point_count_abbreviated"],
           "text-size": 11,
           "text-font": ["Noto Sans Bold"],
+          "text-anchor": "center",
         },
         paint: { "text-color": "#000000" },
-      });
+      })
 
-      // Soft glow behind each individual marker in the same medal color
-      map.addLayer({
-        id: "marker-glow",
-        type: "circle",
-        source: "athletes",
-        filter: ["!", ["has", "point_count"]],
-        paint: {
-          "circle-radius": 16,
-          "circle-opacity": 0.25,
-          "circle-blur": 0.5,
-          "circle-color": [
-            "match",
-            ["get", "bestMedal"],
-            "gold",
-            MEDAL_COLORS.gold,
-            "silver",
-            MEDAL_COLORS.silver,
-            MEDAL_COLORS.bronze,
-          ],
-        },
-      });
+      // ── Interaction ─────────────────────────────────────────────
 
-      // One dot per unique birth location, colored by best medal there
-      map.addLayer({
-        id: "marker-circle",
-        type: "circle",
-        source: "athletes",
-        filter: ["!", ["has", "point_count"]],
-        paint: {
-          "circle-radius": 10,
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#000",
-          "circle-color": [
-            "match",
-            ["get", "bestMedal"],
-            "gold",
-            MEDAL_COLORS.gold,
-            "silver",
-            MEDAL_COLORS.silver,
-            MEDAL_COLORS.bronze,
-          ],
-        },
-      });
-
-      // Count label on individual markers with more than one athlete
-      map.addLayer({
-        id: "marker-count",
-        type: "symbol",
-        source: "athletes",
-        filter: [
-          "all",
-          ["!", ["has", "point_count"]],
-          [">", ["get", "athleteCount"], 1],
-        ],
-        layout: {
-          "text-field": ["get", "athleteCount"],
-          "text-size": 10,
-          "text-font": ["Noto Sans Bold"],
-        },
-        paint: { "text-color": "#000000" },
-      });
-
-      // Click individual marker → show popup
-      map.on("click", "marker-circle", (e) => {
-        const feature = e.features?.[0];
-        if (!feature) return;
+      map.on("click", "marker-bullseye", (e) => {
+        const feature = e.features?.[0]
+        if (!feature) return
         const coords = (feature.geometry as GeoJSON.Point).coordinates as [
           number,
           number,
-        ];
-        const key = feature.properties?.["coordKey"] as string;
-        const location = locationsMapRef.current.get(key);
-        if (!location) return;
+        ]
+        const key = feature.properties?.["coordKey"] as string
+        const location = locationsMapRef.current.get(key)
+        if (!location) return
 
-        const node = document.createElement("div");
-        render(<AthletePopup location={location} />, node);
+        const node = document.createElement("div")
+        render(<AthletePopup location={location} />, node)
 
-        popupRef.current?.remove();
+        popupRef.current?.remove()
         popupRef.current = new maplibregl.Popup({
           maxWidth: "300px",
           anchor: "bottom",
         })
           .setLngLat(coords)
           .setDOMContent(node)
-          .addTo(map);
-      });
+          .addTo(map)
+      })
 
-      // Click cluster → zoom in to expand it
-      map.on("click", "cluster-circle", (e) => {
-        const feature = e.features?.[0];
-        if (!feature?.properties) return;
-        const clusterId = feature.properties["cluster_id"] as number;
+      map.on("click", "cluster-bullseye", (e) => {
+        const feature = e.features?.[0]
+        if (!feature?.properties) return
+        const clusterId = feature.properties["cluster_id"] as number
         const coords = (feature.geometry as GeoJSON.Point).coordinates as [
           number,
           number,
-        ];
-        (map.getSource("athletes") as maplibregl.GeoJSONSource)
+        ]
+        ;(map.getSource("athletes") as maplibregl.GeoJSONSource)
           .getClusterExpansionZoom(clusterId)
           .then((zoom) => map.flyTo({ center: coords, zoom: zoom + 1 }))
-          .catch(() => {});
-      });
+          .catch(() => {})
+      })
 
-      // Pointer cursor on hover
-      map.on("mouseenter", "marker-circle", () => {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", "marker-circle", () => {
-        map.getCanvas().style.cursor = "";
-      });
-      map.on("mouseenter", "cluster-circle", () => {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", "cluster-circle", () => {
-        map.getCanvas().style.cursor = "";
-      });
-    });
+      for (const layer of ["marker-bullseye", "cluster-bullseye"]) {
+        map.on("mouseenter", layer, () => {
+          map.getCanvas().style.cursor = "pointer"
+        })
+        map.on("mouseleave", layer, () => {
+          map.getCanvas().style.cursor = ""
+        })
+      }
+    })
 
-    mapRef.current = map;
+    mapRef.current = map
     return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, []);
+      map.remove()
+      mapRef.current = null
+    }
+  }, [])
 
-  return <div class="map-container" ref={containerRef} />;
+  return <div class="map-container" ref={containerRef} />
 }
