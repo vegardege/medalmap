@@ -2,6 +2,7 @@ import { useState } from "preact/hooks";
 import type { FilterState } from "../types";
 import { FilterSection } from "./FilterSection";
 import { InfoModal } from "./InfoModal";
+import { MissingDataModal } from "./MissingDataModal";
 
 interface Options {
   sports: string[];
@@ -33,6 +34,7 @@ export function FilterPanel({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [missingOpen, setMissingOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
 
   const visibleCountries = countrySearch
@@ -192,6 +194,13 @@ export function FilterPanel({
         <button
           class="filter-info-btn"
           type="button"
+          onClick={() => setMissingOpen(true)}
+        >
+          Missing Data
+        </button>
+        <button
+          class="filter-info-btn"
+          type="button"
           onClick={() => setInfoOpen(true)}
         >
           About
@@ -202,6 +211,9 @@ export function FilterPanel({
 
   return (
     <>
+      {missingOpen && (
+        <MissingDataModal onClose={() => setMissingOpen(false)} />
+      )}
       {infoOpen && <InfoModal onClose={() => setInfoOpen(false)} />}
       {/* Desktop: always-visible sidebar (rendered via CSS) */}
       <div
