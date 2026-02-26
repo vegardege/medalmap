@@ -161,12 +161,16 @@ export function AthletePopup({
   const pageAthletes = athletes.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   function onTouchStart(e: TouchEvent) {
-    touchStartX.current = e.touches[0].clientX;
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchStartX.current = touch.clientX;
   }
 
   function onTouchEnd(e: TouchEvent) {
     if (touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    const delta = touch.clientX - touchStartX.current;
     touchStartX.current = null;
     if (delta < -40) setPage((p) => Math.min(p + 1, pageCount - 1));
     if (delta > 40) setPage((p) => Math.max(p - 1, 0));

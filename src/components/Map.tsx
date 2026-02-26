@@ -203,7 +203,7 @@ export function MapView({ locations }: Props) {
         // opens below the marker when near the top edge, and above otherwise.
         const point = map.project(coords);
         const canvasH = map.getContainer().clientHeight;
-        const anchor: maplibregl.Anchor =
+        const anchor: NonNullable<maplibregl.PopupOptions["anchor"]> =
           point.y < canvasH * 0.45 ? "top" : "bottom";
 
         popupRef.current = new maplibregl.Popup({ maxWidth: "300px", anchor })
