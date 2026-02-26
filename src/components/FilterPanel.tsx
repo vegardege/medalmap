@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import type { FilterState } from "../types";
 import { FilterSection } from "./FilterSection";
+import { InfoModal } from "./InfoModal";
 
 interface Options {
   sports: string[];
@@ -31,6 +32,7 @@ export function FilterPanel({
 }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
 
   const visibleCountries = countrySearch
@@ -186,11 +188,21 @@ export function FilterPanel({
           </div>
         </FilterSection>
       </div>
+      <div class="filter-panel-footer">
+        <button
+          class="filter-info-btn"
+          type="button"
+          onClick={() => setInfoOpen(true)}
+        >
+          About
+        </button>
+      </div>
     </div>
   );
 
   return (
     <>
+      {infoOpen && <InfoModal onClose={() => setInfoOpen(false)} />}
       {/* Desktop: always-visible sidebar (rendered via CSS) */}
       <div
         class={`filter-sidebar${sidebarOpen ? "" : " filter-sidebar--collapsed"}`}
