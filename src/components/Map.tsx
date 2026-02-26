@@ -19,6 +19,7 @@ function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
       properties: {
         coordKey: loc.coords.join(","),
         bestMedal: bestMedal(loc.athletes.flatMap((a) => a.medals)),
+        athleteCount: loc.athletes.length,
       },
     })),
   };
@@ -121,6 +122,7 @@ export function MapView({ locations }: Props) {
             "+",
             ["case", ["==", ["get", "bestMedal"], "silver"], 1, 0],
           ],
+          totalAthletes: ["+", ["get", "athleteCount"]],
         },
       });
 
@@ -175,7 +177,7 @@ export function MapView({ locations }: Props) {
             "bronze-cluster",
           ],
           "icon-allow-overlap": true,
-          "text-field": ["get", "point_count_abbreviated"],
+          "text-field": ["get", "totalAthletes"],
           "text-size": 11,
           "text-font": ["Noto Sans Bold"],
           "text-anchor": "center",
@@ -275,7 +277,7 @@ export function MapView({ locations }: Props) {
           return locationsMapRef.current.get(key)?.athletes ?? [];
         });
 
-        openPopup({ coords, athletes }, coords, `${pointCount} athletes`);
+        openPopup({ coords, athletes }, coords, `${athletes.length} athletes`);
       });
 
       for (const layer of ["marker-bullseye", "cluster-bullseye"]) {
