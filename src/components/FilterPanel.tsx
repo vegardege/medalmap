@@ -67,7 +67,7 @@ export function FilterPanel({
       </div>
 
       <div class="filter-sections">
-        <FilterSection title="Medals" defaultOpen>
+        <FilterSection title="Medals">
           <div class="filter-toggles">
             {(["gold", "silver", "bronze"] as const).map((m) => (
               <button
@@ -87,7 +87,7 @@ export function FilterPanel({
           </div>
         </FilterSection>
 
-        <FilterSection title="Category" defaultOpen>
+        <FilterSection title="Category">
           <div class="filter-toggles">
             {(["men", "women", "mixed"] as const).map((c) => (
               <button
@@ -108,21 +108,21 @@ export function FilterPanel({
         </FilterSection>
 
         <FilterSection title="Sport">
-          <div class="filter-checklist">
+          <div class="filter-list">
             {options.sports.map((s) => (
-              <label key={s} class="filter-check-label">
-                <input
-                  type="checkbox"
-                  checked={filters.sports.includes(s)}
-                  onChange={() =>
-                    setFilters({
-                      ...filters,
-                      sports: toggleItem(filters.sports, s),
-                    })
-                  }
-                />
+              <button
+                key={s}
+                type="button"
+                class={`filter-row${filters.sports.includes(s) ? " active" : ""}`}
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    sports: toggleItem(filters.sports, s),
+                  })
+                }
+              >
                 {s}
-              </label>
+              </button>
             ))}
           </div>
         </FilterSection>
@@ -137,41 +137,41 @@ export function FilterPanel({
               setCountrySearch((e.target as HTMLInputElement).value)
             }
           />
-          <div class="filter-checklist">
+          <div class="filter-list">
             {visibleCountries.map((c) => (
-              <label key={c} class="filter-check-label">
-                <input
-                  type="checkbox"
-                  checked={filters.countries.includes(c)}
-                  onChange={() =>
-                    setFilters({
-                      ...filters,
-                      countries: toggleItem(filters.countries, c),
-                    })
-                  }
-                />
+              <button
+                key={c}
+                type="button"
+                class={`filter-row${filters.countries.includes(c) ? " active" : ""}`}
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    countries: toggleItem(filters.countries, c),
+                  })
+                }
+              >
                 {c}
-              </label>
+              </button>
             ))}
           </div>
         </FilterSection>
 
         <FilterSection title="Year">
-          <div class="filter-checklist">
+          <div class="filter-list">
             {options.years.map((y) => (
-              <label key={y} class="filter-check-label">
-                <input
-                  type="checkbox"
-                  checked={filters.years.includes(y)}
-                  onChange={() =>
-                    setFilters({
-                      ...filters,
-                      years: toggleItem(filters.years, y),
-                    })
-                  }
-                />
+              <button
+                key={y}
+                type="button"
+                class={`filter-row${filters.years.includes(y) ? " active" : ""}`}
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    years: toggleItem(filters.years, y),
+                  })
+                }
+              >
                 {y}
-              </label>
+              </button>
             ))}
           </div>
         </FilterSection>
