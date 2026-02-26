@@ -160,3 +160,341 @@ body {
 .popup-wiki:hover {
   opacity: 1;
 }
+
+/* ── Filter panel ──────────────────────────────────────────── */
+
+.filter-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #12122a;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.filter-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.filter-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.filter-panel-count {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.filter-clear {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.filter-clear:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.filter-panel-close {
+  display: none;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  opacity: 0.6;
+}
+
+.filter-panel-close:hover {
+  opacity: 1;
+}
+
+.filter-sections {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.filter-sections::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-sections::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+/* ── FilterSection ─────────────────────────────────────────── */
+
+.filter-section {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.filter-section-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: left;
+  opacity: 0.65;
+}
+
+.filter-section-header:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.filter-section-title {
+  flex: 1;
+}
+
+.filter-section-chevron {
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+  transform: rotate(90deg);
+}
+
+.filter-section--open .filter-section-chevron {
+  transform: rotate(270deg);
+}
+
+.filter-section-body {
+  display: none;
+  padding: 4px 14px 12px;
+}
+
+.filter-section--open .filter-section-body {
+  display: block;
+}
+
+/* ── Toggle buttons (medals, category) ─────────────────────── */
+
+.filter-toggles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-toggle {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.filter-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.filter-toggle.active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.filter-toggle--gold.active {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.filter-toggle--silver.active {
+  background: rgba(168, 169, 173, 0.2);
+  border-color: var(--color-silver);
+  color: var(--color-silver);
+}
+
+.filter-toggle--bronze.active {
+  background: rgba(205, 127, 50, 0.2);
+  border-color: var(--color-bronze);
+  color: var(--color-bronze);
+}
+
+/* ── Checkbox lists (sport, country, year) ─────────────────── */
+
+.filter-search {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 5px 8px;
+  margin-bottom: 8px;
+}
+
+.filter-search:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.filter-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.filter-checklist::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-checklist::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.filter-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.filter-check-label input[type="checkbox"] {
+  accent-color: var(--color-gold);
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ── FAB (mobile only) ─────────────────────────────────────── */
+
+.filter-fab {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 200;
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  color: var(--text);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  position: fixed;
+}
+
+.filter-fab--active {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.filter-fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--color-gold);
+  color: #000;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Backdrop + Drawer (mobile only) ───────────────────────── */
+
+.filter-backdrop {
+  display: none;
+}
+
+.filter-drawer {
+  display: none;
+}
+
+/* ── Mobile layout ─────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  .filter-sidebar {
+    display: none;
+  }
+
+  .filter-fab {
+    display: flex;
+  }
+
+  .filter-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 290;
+  }
+
+  .filter-drawer {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 300;
+    max-height: 60vh;
+    background: #12122a;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+  }
+
+  .filter-drawer--open {
+    transform: translateY(0);
+  }
+
+  .filter-drawer .filter-panel {
+    max-height: 60vh;
+  }
+
+  .filter-panel-close {
+    display: block;
+  }
+}
