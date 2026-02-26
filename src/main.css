@@ -311,6 +311,17 @@ a.missing-card:hover {
   margin-top: 4px;
 }
 
+.missing-search-count {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  margin-top: 6px;
+}
+
+.missing-no-results {
+  font-size: 0.85rem;
+  opacity: 0.5;
+}
+
 /* ── Filter panel footer ───────────────────────────────────── */
 
 .filter-panel-footer {

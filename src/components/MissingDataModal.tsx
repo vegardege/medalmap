@@ -1,3 +1,4 @@
+import { useState } from "preact/hooks";
 import { allAthletes } from "../data";
 import type { Athlete } from "../types";
 
@@ -23,8 +24,15 @@ function groupByCountry(athletes: Athlete[]): [string, Athlete[]][] {
   return [...map].sort(([a], [b]) => a.localeCompare(b));
 }
 
+function matchesSearch(athlete: Athlete, tokens: string[]): boolean {
+  if (tokens.length === 0) return true;
+  const country = athlete.medals[0]?.country ?? "";
+  const sports = athlete.medals.map((m) => m.sport).join(" ");
+  const text = `${athlete.name} ${country} ${sports}`.toLowerCase();
+  return tokens.every((token) => text.includes(token));
+}
+
 const missing = allAthletes.filter((a) => a.birthCoords === null);
-const byCountry = groupByCountry(missing);
 
 function AthleteCard({ athlete }: { athlete: Athlete }) {
   const sport = getSports(athlete);
@@ -57,6 +65,14 @@ function AthleteCard({ athlete }: { athlete: Athlete }) {
 }
 
 export function MissingDataModal({ onClose }: Props) {
+  const [query, setQuery] = useState("");
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const filtered =
+    tokens.length > 0
+      ? missing.filter((a) => matchesSearch(a, tokens))
+      : missing;
+  const byCountry = groupByCountry(filtered);
+
   return (
     <div
       class="modal-backdrop"
@@ -94,6 +110,17 @@ export function MissingDataModal({ onClose }: Props) {
             </p>
           </section>
 
+          <section class="modal-section">
+            <input
+              class="filter-search"
+              type="search"
+              placeholder="Search by name, country, or sport…"
+              value={query}
+              onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
+              aria-label="Search missing athletes"
+            />
+          </section>
+
           {byCountry.map(([country, athletes]) => (
             <section class="modal-section" key={country}>
               <h3>
@@ -106,6 +133,12 @@ export function MissingDataModal({ onClose }: Props) {
               </div>
             </section>
           ))}
+
+          {tokens.length > 0 && filtered.length === 0 && (
+            <section class="modal-section">
+              <p class="missing-no-results">No athletes match your search.</p>
+            </section>
+          )}
         </div>
       </div>
     </div>
