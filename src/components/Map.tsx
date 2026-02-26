@@ -206,13 +206,49 @@ export function MapView({ locations }: Props) {
           node,
         );
         popupRef.current?.remove();
-        popupRef.current = new maplibregl.Popup({
-          maxWidth: "300px",
-          anchor: "bottom",
-        })
+
+        // Pick anchor based on vertical screen position so the popup
+        // opens below the marker when near the top edge, and above otherwise.
+        const point = map.project(coords);
+        const canvasH = map.getContainer().clientHeight;
+        const anchor: maplibregl.Anchor =
+          point.y < canvasH * 0.45 ? "top" : "bottom";
+
+        popupRef.current = new maplibregl.Popup({ maxWidth: "300px", anchor })
           .setLngLat(coords)
           .setDOMContent(node)
           .addTo(map);
+
+        // Pan the map so the popup is fully visible within the container.
+        const popEl = popupRef.current.getElement();
+        if (!popEl) return;
+        const popRect = popEl.getBoundingClientRect();
+        const mapRect = map.getContainer().getBoundingClientRect();
+        const pad = 8;
+
+        // Positive panBy x → camera moves right → content moves left.
+        // We want the popup to shift: compute how far each edge overhangs.
+        const leftOverhang = mapRect.left + pad - popRect.left; // > 0 if clipped left
+        const rightOverhang = popRect.right - (mapRect.right - pad); // > 0 if clipped right
+        const topOverhang = mapRect.top + pad - popRect.top; // > 0 if clipped top
+        const bottomOverhang = popRect.bottom - (mapRect.bottom - pad); // > 0 if clipped bottom
+
+        const dx =
+          leftOverhang > 0
+            ? -leftOverhang
+            : rightOverhang > 0
+              ? rightOverhang
+              : 0;
+        const dy =
+          topOverhang > 0
+            ? -topOverhang
+            : bottomOverhang > 0
+              ? bottomOverhang
+              : 0;
+
+        if (dx !== 0 || dy !== 0) {
+          map.panBy([dx, dy], { duration: 250 });
+        }
       }
 
       map.on("click", "marker-bullseye", (e) => {

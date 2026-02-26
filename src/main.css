@@ -52,6 +52,28 @@ body {
   border-top-color: var(--bg);
 }
 
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: var(--bg);
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--bg);
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--bg);
+}
+
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: var(--bg);
+}
+
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: var(--bg);
+}
+
 .maplibregl-popup-close-button {
   top: 12px;
   right: 14px;
