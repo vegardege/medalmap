@@ -48,6 +48,24 @@ function WikipediaIcon() {
   );
 }
 
+function WikidataIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="1em"
+      height="1em"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <rect x="1.5" y="4" width="2.5" height="12" />
+      <rect x="5.5" y="4" width="1.5" height="12" />
+      <rect x="8.5" y="4" width="2.5" height="12" />
+      <rect x="12.5" y="4" width="1.5" height="12" />
+      <rect x="15.5" y="4" width="3" height="12" />
+    </svg>
+  );
+}
+
 function AthleteRow({
   athlete,
   onSelect,
@@ -82,6 +100,9 @@ function AthleteDetail({
 }) {
   const medals = sortedMedals(athlete.medals);
   const wikiUrl = `https://en.wikipedia.org/wiki/${athlete.id}`;
+  const wikidataUrl = athlete.wikidataId
+    ? `https://www.wikidata.org/wiki/${athlete.wikidataId}`
+    : null;
 
   return (
     <div class="athlete-popup">
@@ -98,14 +119,26 @@ function AthleteDetail({
           </div>
         ))}
       </div>
-      <a
-        class="popup-wiki"
-        href={wikiUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <WikipediaIcon /> Wikipedia
-      </a>
+      <div class="popup-links">
+        <a
+          class="popup-wiki"
+          href={wikiUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <WikipediaIcon /> Wikipedia
+        </a>
+        {wikidataUrl && (
+          <a
+            class="popup-wiki"
+            href={wikidataUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <WikidataIcon /> Wikidata
+          </a>
+        )}
+      </div>
     </div>
   );
 }

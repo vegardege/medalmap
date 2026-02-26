@@ -12,12 +12,14 @@ const USER_AGENT = "medalmap/1.0 (https://github.com/vegardege/medalmap)";
 // Add more optional fields here as the pipeline grows.
 export interface WikidataEntry {
   id: string; // Wikipedia page title — matches `id` in wikipedia.json
+  wikidataId: string | null; // Wikidata Q code, e.g. "Q12345"
   birthPlace: string | null; // Human-readable name of birth place
   birthCoords: [number, number] | null; // [longitude, latitude]
 }
 
 interface SparqlBinding {
   article: { value: string };
+  item?: { value: string };
   birthPlaceLabel?: { value: string };
   lat?: { value: string };
   lon?: { value: string };
@@ -41,7 +43,7 @@ async function queryBatch(ids: string[]): Promise<WikidataEntry[]> {
   // The label service fills ?birthPlaceLabel from ?birthPlace automatically.
   // geof:latitude / geof:longitude extract from the WKT GeoPoint literal.
   const sparql = `
-  SELECT ?article ?birthPlaceLabel ?lat ?lon WHERE {
+  SELECT ?article ?item ?birthPlaceLabel ?lat ?lon WHERE {
     VALUES ?article { ${values} }
     ?article schema:about ?item .
     OPTIONAL {
@@ -89,8 +91,13 @@ async function queryBatch(ids: string[]): Promise<WikidataEntry[]> {
 
     const lat = binding.lat?.value;
     const lon = binding.lon?.value;
+    const itemIri = binding.item?.value ?? null;
+    const wikidataId = itemIri
+      ? (itemIri.match(/\/([QP]\d+)$/)?.[1] ?? null)
+      : null;
     byId.set(id, {
       id,
+      wikidataId,
       birthPlace: binding.birthPlaceLabel?.value ?? null,
       birthCoords:
         lat !== undefined && lon !== undefined
@@ -101,7 +108,13 @@ async function queryBatch(ids: string[]): Promise<WikidataEntry[]> {
 
   // Always emit an entry for every requested ID so callers can detect gaps.
   return ids.map(
-    (id) => byId.get(id) ?? { id, birthPlace: null, birthCoords: null },
+    (id) =>
+      byId.get(id) ?? {
+        id,
+        wikidataId: null,
+        birthPlace: null,
+        birthCoords: null,
+      },
   );
 }
 

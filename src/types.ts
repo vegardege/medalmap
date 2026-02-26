@@ -12,6 +12,7 @@ export interface Medal {
 // A medal winner in any Olympic games
 export interface Athlete {
   id: string;
+  wikidataId: string | null; // Wikidata Q code, e.g. "Q12345"
   name: string;
   birthPlace: string | null;
   birthCoords: [number, number] | null;

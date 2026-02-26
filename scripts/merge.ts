@@ -108,6 +108,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     // Priority: override > wikidata
     athletes.push({
       id,
+      wikidataId: wd?.wikidataId ?? null,
       name: ov?.name ?? entries[0]!.name,
       birthPlace: ov?.birthPlace ?? wd?.birthPlace ?? null,
       birthCoords: ov?.birthCoords ?? wd?.birthCoords ?? null,
