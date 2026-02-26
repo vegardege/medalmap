@@ -107,37 +107,39 @@ function AthleteDetail({
   return (
     <div class="athlete-popup">
       <button type="button" class="popup-place popup-back" onClick={onBack}>
-        <span class="popup-back-arrow">←</span> {placeName}
+        <span class="popup-back-arrow">‹</span> {placeName}
       </button>
-      <div class="popup-name">{athlete.name}</div>
-      <div class="popup-sport">{getSport(athlete)}</div>
-      <div class="popup-medals">
-        {medals.map((medal) => (
-          <div class="popup-medal" key={`${medal.year}-${medal.event}`}>
-            {MEDAL_EMOJI[medal.medal]} {medal.event} ·{" "}
-            {CATEGORY_LABEL[medal.category]}
-          </div>
-        ))}
-      </div>
-      <div class="popup-links">
-        <a
-          class="popup-wiki"
-          href={wikiUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <WikipediaIcon /> Wikipedia
-        </a>
-        {wikidataUrl && (
+      <div class="popup-detail-body">
+        <div class="popup-name">{athlete.name}</div>
+        <div class="popup-sport">{getSport(athlete)}</div>
+        <div class="popup-medals">
+          {medals.map((medal) => (
+            <div class="popup-medal" key={`${medal.year}-${medal.event}`}>
+              {MEDAL_EMOJI[medal.medal]} {medal.event} ·{" "}
+              {CATEGORY_LABEL[medal.category]}
+            </div>
+          ))}
+        </div>
+        <div class="popup-links">
           <a
             class="popup-wiki"
-            href={wikidataUrl}
+            href={wikiUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <WikidataIcon /> Wikidata
+            <WikipediaIcon /> Wikipedia
           </a>
-        )}
+          {wikidataUrl && (
+            <a
+              class="popup-wiki"
+              href={wikidataUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <WikidataIcon /> Wikidata
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

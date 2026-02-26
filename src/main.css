@@ -2,7 +2,7 @@
   --color-gold: #d4af37;
   --color-silver: #a8a9ad;
   --color-bronze: #cd7f32;
-  --bg: #1a1a2e;
+  --bg: #1e1e1e;
   --text: #f0f0f0;
   --radius: 8px;
 }
@@ -43,8 +43,8 @@ body {
   background: var(--bg);
   color: var(--text);
   border-radius: var(--radius);
-  padding: 12px 14px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  padding: 12px 0;
   width: 280px;
 }
 
@@ -65,16 +65,13 @@ body {
 .popup-place {
   font-weight: 600;
   font-size: 0.95rem;
-  padding-right: 1.5rem;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
+  padding: 0 2rem 8px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .popup-athlete {
   cursor: pointer;
-  padding: 4px 2px;
-  border-radius: 4px;
+  padding: 8px 14px;
 }
 
 .popup-athlete:hover {
@@ -82,8 +79,6 @@ body {
 }
 
 .popup-athlete + .popup-athlete {
-  margin-top: 6px;
-  padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -126,6 +121,10 @@ body {
 }
 
 /* Athlete detail page */
+.popup-detail-body {
+  padding: 8px 14px;
+}
+
 .popup-back {
   background: none;
   border-top: none;
@@ -144,12 +143,13 @@ body {
 
 .popup-back-arrow {
   opacity: 0.5;
+  margin-right: 0.4em;
 }
 
 .popup-links {
   display: flex;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .popup-wiki {
@@ -157,14 +157,15 @@ body {
   align-items: center;
   gap: 0.35em;
   font-size: 0.8rem;
-  line-height: 1.6;
   color: inherit;
-  opacity: 0.5;
   text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  padding: 5px 10px;
 }
 
 .popup-wiki:hover {
-  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Info modal ────────────────────────────────────────────── */
@@ -181,7 +182,7 @@ body {
 }
 
 .modal {
-  background: #12122a;
+  background: #141414;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   width: 100%;
@@ -354,7 +355,7 @@ a.missing-card:hover {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: #12122a;
+  background: #141414;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
   transition: width 0.25s ease;
@@ -390,7 +391,7 @@ a.missing-card:hover {
   left: 0;
   z-index: 10;
   width: 20px;
-  background: #12122a;
+  background: #141414;
   border: none;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   color: inherit;
@@ -405,7 +406,7 @@ a.missing-card:hover {
 
 .filter-sidebar-reopen:hover {
   opacity: 1;
-  background: #1a1a3a;
+  background: #2a2a2a;
 }
 
 .filter-panel {
@@ -666,7 +667,7 @@ a.missing-card:hover {
   bottom: 20px;
   right: 20px;
   z-index: 200;
-  background: #1a1a2e;
+  background: #1e1e1e;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   width: 48px;
@@ -747,7 +748,7 @@ a.missing-card:hover {
     right: 0;
     z-index: 300;
     max-height: 60vh;
-    background: #12122a;
+    background: #141414;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px 16px 0 0;
     transform: translateY(100%);
