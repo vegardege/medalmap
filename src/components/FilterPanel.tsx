@@ -30,6 +30,7 @@ export function FilterPanel({
   options,
 }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [countrySearch, setCountrySearch] = useState("");
 
   const visibleCountries = countrySearch
@@ -54,6 +55,15 @@ export function FilterPanel({
           }}
         >
           Clear
+        </button>
+        {/* Desktop collapse button */}
+        <button
+          class="filter-sidebar-toggle"
+          type="button"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Collapse filters"
+        >
+          ‹
         </button>
         {/* Mobile close button */}
         <button
@@ -182,7 +192,20 @@ export function FilterPanel({
   return (
     <>
       {/* Desktop: always-visible sidebar (rendered via CSS) */}
-      <div class="filter-sidebar">{panel}</div>
+      <div
+        class={`filter-sidebar${sidebarOpen ? "" : " filter-sidebar--collapsed"}`}
+      >
+        {panel}
+      </div>
+      <button
+        class="filter-sidebar-reopen"
+        type="button"
+        style={sidebarOpen ? "visibility: hidden" : ""}
+        onClick={() => setSidebarOpen(true)}
+        aria-label="Open filters"
+      >
+        ›
+      </button>
 
       {/* Mobile: FAB + bottom drawer */}
       <button

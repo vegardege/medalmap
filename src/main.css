@@ -31,6 +31,7 @@ body {
 .app {
   display: flex;
   height: 100%;
+  position: relative;
 }
 
 .map-container {
@@ -171,6 +172,55 @@ body {
   background: #12122a;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
+  transition: width 0.25s ease;
+}
+
+.filter-sidebar--collapsed {
+  width: 0;
+  border-right: none;
+}
+
+.filter-sidebar-toggle {
+  display: none;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.filter-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.filter-sidebar-reopen {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  width: 20px;
+  background: #12122a;
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-sidebar-reopen:hover {
+  opacity: 1;
+  background: #1a1a3a;
 }
 
 .filter-panel {
@@ -202,8 +252,8 @@ body {
   border-radius: 4px;
   color: inherit;
   font-family: inherit;
-  font-size: 0.75rem;
-  padding: 2px 8px;
+  font-size: 0.85rem;
+  padding: 5px 10px;
   cursor: pointer;
 }
 
@@ -261,7 +311,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 10px 14px;
+  padding: 10px 22px 10px 14px;
   cursor: pointer;
   text-align: left;
   opacity: 0.65;
@@ -289,7 +339,7 @@ body {
 
 .filter-section-body {
   display: none;
-  padding: 10px 14px;
+  padding: 0 14px;
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -303,6 +353,7 @@ body {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  padding: 10px 0;
 }
 
 .filter-toggle {
@@ -357,7 +408,7 @@ body {
   font-family: inherit;
   font-size: 0.8rem;
   padding: 5px 8px;
-  margin-bottom: 8px;
+  margin: 10px 0 8px;
 }
 
 .filter-search:focus {
@@ -475,6 +526,16 @@ body {
 }
 
 /* ── Mobile layout ─────────────────────────────────────────── */
+
+@media (min-width: 701px) {
+  .filter-sidebar-toggle {
+    display: block;
+  }
+
+  .filter-sidebar-reopen {
+    display: flex;
+  }
+}
 
 @media (max-width: 700px) {
   .filter-sidebar {
