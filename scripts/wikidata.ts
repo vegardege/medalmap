@@ -29,10 +29,16 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Encode a Wikipedia page title back to a URL, preserving underscores.
-// encodeURIComponent does not encode `_`, so "Beat_Feuz" stays "Beat_Feuz".
+// Convert a Wikipedia page title to a canonical article URL for use in SPARQL.
+// Wikidata's encoding is inconsistent and must be matched exactly:
+//   - Non-ASCII characters (ü, ø, é …) → percent-encoded UTF-8 (%C3%BC etc.)
+//   - Apostrophe (')                    → %27  (encodeURIComponent leaves it literal)
+//   - Parentheses () and comma (,)      → literal  (encodeURIComponent encodes comma)
+// Strategy: encodeURIComponent handles non-ASCII, then fix up the exceptions.
 function toArticleUrl(id: string): string {
-  return `https://en.wikipedia.org/wiki/${encodeURIComponent(id)}`;
+  return `https://en.wikipedia.org/wiki/${encodeURIComponent(id)
+    .replace(/'/g, "%27")
+    .replace(/%2C/g, ",")}`;
 }
 
 async function queryBatch(ids: string[]): Promise<WikidataEntry[]> {

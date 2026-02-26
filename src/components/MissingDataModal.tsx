@@ -81,8 +81,8 @@ export function MissingDataModal({ onClose }: Props) {
           <section class="modal-section">
             <p>
               {missing.length} athlete{missing.length !== 1 ? "s are" : " is"}{" "}
-              missing birth location data and won't appear on the map. Click a
-              card to open their Wikidata page and add{" "}
+              missing birth location data and won't appear on the map. Click to
+              open Wikidata and add{" "}
               <a
                 href="https://www.wikidata.org/wiki/Property:P19"
                 target="_blank"
