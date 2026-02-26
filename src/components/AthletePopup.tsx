@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 import type { Athlete, Location } from "../types";
 
 const MEDAL_EMOJI = { gold: "🥇", silver: "🥈", bronze: "🥉" } as const;
@@ -145,10 +145,35 @@ function AthleteDetail({
   );
 }
 
-export function AthletePopup({ location }: { location: Location }) {
+const PAGE_SIZE = 3;
+
+export function AthletePopup({
+  location,
+  placeName: placeNameProp,
+}: {
+  location: Location;
+  placeName?: string;
+}) {
   const [selected, setSelected] = useState<Athlete | null>(null);
-  const placeName = location.athletes[0]?.birthPlace ?? "Unknown location";
+  const [page, setPage] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const placeName =
+    placeNameProp ?? location.athletes[0]?.birthPlace ?? "Unknown location";
   const athletes = sortAthletes(location.athletes);
+  const pageCount = Math.ceil(athletes.length / PAGE_SIZE);
+  const pageAthletes = athletes.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  function onTouchStart(e: TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function onTouchEnd(e: TouchEvent) {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (delta < -40) setPage((p) => Math.min(p + 1, pageCount - 1));
+    if (delta > 40) setPage((p) => Math.max(p - 1, 0));
+  }
 
   if (selected) {
     return (
@@ -163,8 +188,12 @@ export function AthletePopup({ location }: { location: Location }) {
   return (
     <div class="athlete-popup">
       <div class="popup-place">{placeName}</div>
-      <div class="popup-athletes">
-        {athletes.map((athlete) => (
+      <div
+        class="popup-athletes"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {pageAthletes.map((athlete) => (
           <AthleteRow
             key={athlete.id}
             athlete={athlete}
@@ -172,6 +201,29 @@ export function AthletePopup({ location }: { location: Location }) {
           />
         ))}
       </div>
+      {pageCount > 1 && (
+        <div class="popup-pagination">
+          <button
+            type="button"
+            class="popup-pagination-btn"
+            onClick={() => setPage((p) => p - 1)}
+            disabled={page === 0}
+          >
+            ‹
+          </button>
+          <span class="popup-pagination-label">
+            {page + 1} / {pageCount}
+          </span>
+          <button
+            type="button"
+            class="popup-pagination-btn"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page === pageCount - 1}
+          >
+            ›
+          </button>
+        </div>
+      )}
     </div>
   );
 }

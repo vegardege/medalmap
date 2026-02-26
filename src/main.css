@@ -44,7 +44,7 @@ body {
   color: var(--text);
   border-radius: var(--radius);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  padding: 12px 0;
+  padding: 12px 0 4px;
   width: 280px;
 }
 
@@ -99,9 +99,41 @@ body {
   font-size: 1.1em;
 }
 
-.popup-athletes {
-  max-height: 260px;
-  overflow-y: auto;
+.popup-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.popup-pagination-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 5px 14px;
+  cursor: pointer;
+}
+
+.popup-pagination-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.popup-pagination-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.popup-pagination-label {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  min-width: 2.5rem;
+  text-align: center;
 }
 
 .popup-medal {
