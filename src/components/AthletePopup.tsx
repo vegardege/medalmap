@@ -1,15 +1,32 @@
 import { useRef, useState } from "preact/hooks";
 import { getSport } from "../data";
+import { WINTER_OLYMPICS_BY_YEAR } from "../olympics";
 import type { Athlete, Location } from "../types";
 
 const MEDAL_EMOJI = { gold: "🥇", silver: "🥈", bronze: "🥉" } as const;
 const MEDAL_ORDER = { gold: 0, silver: 1, bronze: 2 } as const;
-const CATEGORY_LABEL = { men: "Men", women: "Women", mixed: "Mixed" } as const;
 
 function sortedMedals(medals: Athlete["medals"]) {
   return [...medals].sort(
     (a, b) => MEDAL_ORDER[a.medal] - MEDAL_ORDER[b.medal],
   );
+}
+
+// "(2026)" for a single year, "(2018–2026)" for a career span.
+function yearRange(medals: Athlete["medals"]): string {
+  const years = [...new Set(medals.map((m) => m.year))].sort((a, b) => a - b);
+  if (years.length === 1) return `(${years[0]})`;
+  return `(${years[0]}–${years[years.length - 1]})`;
+}
+
+// Medals grouped by year (ascending), sorted by medal type within each year.
+function medalsByYear(medals: Athlete["medals"]) {
+  const years = [...new Set(medals.map((m) => m.year))].sort((a, b) => a - b);
+  return years.map((year) => ({
+    year,
+    label: `${year} ${WINTER_OLYMPICS_BY_YEAR.get(year)?.city ?? ""}`.trim(),
+    medals: sortedMedals(medals.filter((m) => m.year === year)),
+  }));
 }
 
 function countMedal(athlete: Athlete, type: "gold" | "silver" | "bronze") {
@@ -74,7 +91,9 @@ function AthleteRow({
   return (
     <div class="popup-athlete" onClick={onSelect}>
       <div class="popup-name">{athlete.name}</div>
-      <div class="popup-sport">{getSport(athlete)}</div>
+      <div class="popup-sport">
+        {getSport(athlete)} {yearRange(athlete.medals)}
+      </div>
       <div class="popup-medal-strip">
         {medals.map((medal) => (
           <span key={`${medal.year}-${medal.event}`}>
@@ -95,7 +114,7 @@ function AthleteDetail({
   placeName: string;
   onBack: () => void;
 }) {
-  const medals = sortedMedals(athlete.medals);
+  const groups = medalsByYear(athlete.medals);
   const wikiUrl = `https://en.wikipedia.org/wiki/${athlete.id}`;
   const wikidataUrl = athlete.wikidataId
     ? `https://www.wikidata.org/wiki/${athlete.wikidataId}`
@@ -110,10 +129,14 @@ function AthleteDetail({
         <div class="popup-name">{athlete.name}</div>
         <div class="popup-sport">{getSport(athlete)}</div>
         <div class="popup-medals">
-          {medals.map((medal) => (
-            <div class="popup-medal" key={`${medal.year}-${medal.event}`}>
-              {MEDAL_EMOJI[medal.medal]} {medal.event} ·{" "}
-              {CATEGORY_LABEL[medal.category]}
+          {groups.map(({ year, label, medals }) => (
+            <div key={year} class="popup-year-group">
+              <div class="popup-year-header">{label}</div>
+              {medals.map((medal) => (
+                <div class="popup-medal" key={`${medal.year}-${medal.event}`}>
+                  {MEDAL_EMOJI[medal.medal]} {medal.event}
+                </div>
+              ))}
             </div>
           ))}
         </div>
