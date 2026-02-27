@@ -124,6 +124,24 @@ async function queryBatch(ids: string[]): Promise<WikidataEntry[]> {
   );
 }
 
+// Run queryBatch over all IDs in BATCH_SIZE chunks, with delays between batches.
+async function queryAllBatches(
+  ids: string[],
+  label = "Batch",
+): Promise<WikidataEntry[]> {
+  const results: WikidataEntry[] = [];
+  for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+    const batch = ids.slice(i, i + BATCH_SIZE);
+    const total = Math.ceil(ids.length / BATCH_SIZE);
+    console.log(
+      `  ${label} ${i / BATCH_SIZE + 1}/${total} (${batch.length} athletes)…`,
+    );
+    results.push(...(await queryBatch(batch)));
+    if (i + BATCH_SIZE < ids.length) await sleep(BATCH_DELAY_MS);
+  }
+  return results;
+}
+
 // An athlete has full data when all three fields are populated.
 // Only these are skipped in incremental mode; everything else is re-fetched.
 function hasFullData(entry: WikidataEntry): boolean {
@@ -134,12 +152,54 @@ function hasFullData(entry: WikidataEntry): boolean {
   );
 }
 
+// Check the MediaWiki API for redirects among the given Wikipedia page titles.
+// Returns a map of original title → canonical title for those that redirect.
+// Titles that are not redirects are omitted from the map.
+async function lookupRedirects(ids: string[]): Promise<Map<string, string>> {
+  const redirects = new Map<string, string>();
+
+  for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+    const batch = ids.slice(i, i + BATCH_SIZE);
+    const titles = batch.map(encodeURIComponent).join("|");
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${titles}&redirects=1&format=json`;
+
+    const response = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+    });
+    if (!response.ok) {
+      throw new Error(
+        `MediaWiki API HTTP ${response.status}: ${await response.text()}`,
+      );
+    }
+
+    const json = (await response.json()) as {
+      query?: { redirects?: Array<{ from: string; to: string }> };
+    };
+
+    for (const r of json.query?.redirects ?? []) {
+      // MediaWiki uses spaces in titles; our IDs use underscores.
+      const from = r.from.replace(/ /g, "_");
+      const to = r.to.replace(/ /g, "_");
+      redirects.set(from, to);
+    }
+
+    if (i + BATCH_SIZE < ids.length) await sleep(BATCH_DELAY_MS);
+  }
+
+  return redirects;
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
   const force = args.includes("--force");
+  const resolveRedirects = args.includes("--resolve-redirects");
   const yearArg = args.find((a) => /^\d{4}$/.test(a));
 
   // Determine which wikipedia file(s) to read for athlete IDs.
+  if (!existsSync("data/wikipedia")) {
+    throw new Error("data/wikipedia/ not found — run pipeline:wikipedia first");
+  }
+
   const wikipediaPaths = yearArg
     ? [`data/wikipedia/${yearArg}.json`]
     : readdirSync("data/wikipedia")
@@ -179,23 +239,46 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     `wikidata: ${scopeIds.size} athletes in scope (${scope}), ${toFetch.length} to fetch`,
   );
 
-  const batches: string[][] = [];
-  for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
-    batches.push(toFetch.slice(i, i + BATCH_SIZE));
-  }
-
-  const fetched: WikidataEntry[] = [];
-  for (let i = 0; i < batches.length; i++) {
-    const batch = batches[i]!;
-    console.log(
-      `  Batch ${i + 1}/${batches.length} (${batch.length} athletes)…`,
-    );
-    fetched.push(...(await queryBatch(batch)));
-    if (i < batches.length - 1) await sleep(BATCH_DELAY_MS);
-  }
+  const fetched = await queryAllBatches(toFetch);
 
   // Merge fetched results into the existing map (other years untouched).
   for (const e of fetched) existing.set(e.id, e);
+
+  // Redirect resolution pass: for all entries still missing a wikidataId,
+  // check whether their Wikipedia page is a redirect to a different title,
+  // then re-query Wikidata using the canonical title.
+  if (resolveRedirects) {
+    const nullIds = [...existing.values()]
+      .filter((e) => e.wikidataId === null)
+      .map((e) => e.id);
+
+    console.log(
+      `wikidata: checking ${nullIds.length} null entries for redirects…`,
+    );
+    const redirectMap = await lookupRedirects(nullIds);
+    console.log(`  ${redirectMap.size} redirect(s) found`);
+
+    if (redirectMap.size > 0) {
+      // Query Wikidata using canonical titles, then store under original IDs.
+      const canonicalIds = [...redirectMap.values()];
+      const redirectFetched = await queryAllBatches(
+        canonicalIds,
+        "Redirect batch",
+      );
+
+      // Map canonical results back to original IDs.
+      const byCanonical = new Map(redirectFetched.map((e) => [e.id, e]));
+      let resolved = 0;
+      for (const [originalId, canonicalId] of redirectMap) {
+        const result = byCanonical.get(canonicalId);
+        if (result?.wikidataId !== null) {
+          existing.set(originalId, { ...result!, id: originalId });
+          resolved++;
+        }
+      }
+      console.log(`  ${resolved} redirect(s) resolved to a Wikidata entry`);
+    }
+  }
 
   const all = [...existing.values()];
   const withCoords = all.filter((r) => r.birthCoords !== null).length;
