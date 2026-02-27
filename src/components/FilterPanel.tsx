@@ -33,13 +33,6 @@ export function FilterPanel({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [infoOpen, setInfoOpen] = useState(false);
   const [missingOpen, setMissingOpen] = useState(false);
-  const [countrySearch, setCountrySearch] = useState("");
-
-  const visibleCountries = countrySearch
-    ? options.countries.filter((c) =>
-        c.toLowerCase().includes(countrySearch.toLowerCase()),
-      )
-    : options.countries;
 
   const panel = (
     <div class="filter-panel">
@@ -51,10 +44,7 @@ export function FilterPanel({
           class="filter-clear"
           type="button"
           style={activeCount === 0 ? "visibility: hidden" : ""}
-          onClick={() => {
-            clearFilters();
-            setCountrySearch("");
-          }}
+          onClick={() => clearFilters()}
         >
           Clear
         </button>
@@ -76,6 +66,31 @@ export function FilterPanel({
         >
           ✕
         </button>
+      </div>
+
+      <div class="filter-global-search-wrap">
+        <input
+          class="filter-global-search"
+          type="text"
+          placeholder="Athlete, sport, country, city…"
+          value={filters.query}
+          onInput={(e) =>
+            setFilters({
+              ...filters,
+              query: (e.target as HTMLInputElement).value,
+            })
+          }
+        />
+        {filters.query && (
+          <button
+            class="filter-global-search-clear"
+            type="button"
+            aria-label="Clear search"
+            onClick={() => setFilters({ ...filters, query: "" })}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <div class="filter-sections">
@@ -140,17 +155,8 @@ export function FilterPanel({
         </FilterSection>
 
         <FilterSection title="Country">
-          <input
-            class="filter-search"
-            type="search"
-            placeholder="Search countries…"
-            value={countrySearch}
-            onInput={(e) =>
-              setCountrySearch((e.target as HTMLInputElement).value)
-            }
-          />
           <div class="filter-list">
-            {visibleCountries.map((c) => (
+            {options.countries.map((c) => (
               <button
                 key={c}
                 type="button"

@@ -1,4 +1,5 @@
 import rawData from "../data/data.json";
+import { WINTER_OLYMPICS_BY_YEAR } from "./olympics";
 import type { Athlete, FilterState, Location } from "./types";
 
 export const allAthletes = rawData as Athlete[];
@@ -46,8 +47,16 @@ export function filterAthletes(
   athletes: Athlete[],
   filters: FilterState,
 ): Athlete[] {
+  const tokens = filters.query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length > 0);
+
   return athletes
     .map((athlete) => {
+      const nameLower = athlete.name.toLowerCase();
+      const birthLower = (athlete.birthPlace ?? "").toLowerCase();
+
       const matchingMedals = athlete.medals.filter((medal) => {
         if (filters.medals.length > 0 && !filters.medals.includes(medal.medal))
           return false;
@@ -65,6 +74,28 @@ export function filterAthletes(
           return false;
         if (filters.years.length > 0 && !filters.years.includes(medal.year))
           return false;
+
+        if (tokens.length > 0) {
+          const hostCity = (
+            WINTER_OLYMPICS_BY_YEAR.get(medal.year)?.city ?? ""
+          ).toLowerCase();
+          const sportLower = medal.sport.toLowerCase();
+          const eventLower = medal.event.toLowerCase();
+          const countryLower = medal.country.toLowerCase();
+          const yearStr = String(medal.year);
+          const tokenMatches = tokens.every(
+            (t) =>
+              nameLower.includes(t) ||
+              birthLower.includes(t) ||
+              sportLower.includes(t) ||
+              eventLower.includes(t) ||
+              countryLower.includes(t) ||
+              yearStr.includes(t) ||
+              hostCity.includes(t),
+          );
+          if (!tokenMatches) return false;
+        }
+
         return true;
       });
       if (matchingMedals.length === 0) return null;

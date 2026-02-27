@@ -501,6 +501,52 @@ a.missing-card:hover {
   opacity: 1;
 }
 
+.filter-global-search-wrap {
+  position: relative;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.filter-global-search {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: inherit;
+  font-size: 0.9rem;
+  padding: 7px 30px 7px 10px;
+  box-sizing: border-box;
+}
+
+.filter-global-search::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.filter-global-search:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-global-search-clear {
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.filter-global-search-clear:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .filter-sections {
   flex: 1;
   overflow-y: auto;
