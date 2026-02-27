@@ -6,6 +6,21 @@ import type { WikipediaEntry } from "./wikipedia.ts";
 
 const OVERRIDES_PATH = "data/overrides.json";
 
+// Capitalizes the first letter of each word, including after hyphens.
+function toTitleCase(s: string): string {
+  return s.replace(/(^|[\s-])([a-z])/g, (_, sep, c) => sep + c.toUpperCase())
+}
+
+// Applied after title-casing to resolve any remaining name variants.
+const SPORT_ALIASES: Record<string, string> = {
+  "Short Track Speed Skating": "Short-Track Speed Skating",
+}
+
+function normalizeSport(sport: string): string {
+  const titled = toTitleCase(sport)
+  return SPORT_ALIASES[titled] ?? titled
+}
+
 // Partial override for an athlete. Include only the fields you want to change.
 // Keys starting with _ (e.g. _note) are for human context and are ignored.
 // Add new optional fields here as the pipeline grows (e.g. gender, dateOfBirth).
@@ -95,7 +110,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
     const medals: Medal[] = entries.map((e) => ({
       year: e.year,
-      sport: e.sport,
+      sport: normalizeSport(e.sport),
       event: e.event,
       category: e.category,
       medal: e.medal,

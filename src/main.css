@@ -656,6 +656,42 @@ a.missing-card:hover {
   color: var(--color-bronze);
 }
 
+/* ── Sport chips ────────────────────────────────────────────── */
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0 12px;
+}
+
+.filter-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+}
+
+.filter-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+.filter-chip.active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+}
+
 /* ── Checkbox lists (sport, country, year) ─────────────────── */
 
 .filter-search {

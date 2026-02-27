@@ -72,7 +72,7 @@ export function FilterPanel({
         <input
           class="filter-global-search"
           type="text"
-          placeholder="Athlete, sport, country, city…"
+          placeholder="Sport, host, year, athlete…"
           value={filters.query}
           onInput={(e) =>
             setFilters({
@@ -135,12 +135,12 @@ export function FilterPanel({
         </FilterSection>
 
         <FilterSection title="Sport">
-          <div class="filter-list">
+          <div class="filter-chips">
             {options.sports.map((s) => (
               <button
                 key={s}
                 type="button"
-                class={`filter-row${filters.sports.includes(s) ? " active" : ""}`}
+                class={`filter-chip${filters.sports.includes(s) ? " active" : ""}`}
                 onClick={() =>
                   setFilters({
                     ...filters,
