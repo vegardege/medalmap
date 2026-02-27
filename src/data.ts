@@ -25,18 +25,15 @@ export function groupByCoords(athletes: Athlete[]): Location[] {
 // full dataset (not the filtered one) so options don't disappear as you filter.
 export function deriveFilterOptions(athletes: Athlete[]) {
   const sports = new Set<string>();
-  const countries = new Set<string>();
   const years = new Set<number>();
   for (const athlete of athletes) {
     for (const medal of athlete.medals) {
       sports.add(medal.sport);
-      countries.add(medal.country);
       years.add(medal.year);
     }
   }
   return {
     sports: [...sports].sort(),
-    countries: [...countries].sort(),
     years: [...years].sort((a, b) => a - b),
   };
 }
@@ -67,11 +64,7 @@ export function filterAthletes(
           !filters.categories.includes(medal.category)
         )
           return false;
-        if (
-          filters.countries.length > 0 &&
-          !filters.countries.includes(medal.country)
-        )
-          return false;
+
         if (filters.yearFrom !== null && medal.year < filters.yearFrom)
           return false;
         if (filters.yearTo !== null && medal.year > filters.yearTo)
