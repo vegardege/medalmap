@@ -1,6 +1,5 @@
 import { useState } from "preact/hooks";
 import { toggleItem } from "../data";
-import { WINTER_OLYMPICS_BY_YEAR } from "../olympics";
 import type { FilterState } from "../types";
 import { FilterSection } from "./FilterSection";
 import { InfoModal } from "./InfoModal";
@@ -72,7 +71,7 @@ export function FilterPanel({
         <input
           class="filter-global-search"
           type="text"
-          placeholder="Sport, host, year, athlete…"
+          placeholder="Sport, event, host, year, name…"
           value={filters.query}
           onInput={(e) =>
             setFilters({
@@ -175,22 +174,38 @@ export function FilterPanel({
         </FilterSection>
 
         <FilterSection title="Year">
-          <div class="filter-list">
-            {options.years.map((y) => (
-              <button
-                key={y}
-                type="button"
-                class={`filter-row${filters.years.includes(y) ? " active" : ""}`}
-                onClick={() =>
-                  setFilters({
-                    ...filters,
-                    years: toggleItem(filters.years, y),
-                  })
-                }
-              >
-                {y} {WINTER_OLYMPICS_BY_YEAR.get(y)?.city}
-              </button>
-            ))}
+          <div class="filter-year-range">
+            <select
+              class="filter-year-select"
+              value={filters.yearFrom ?? ""}
+              onChange={(e) => {
+                const val = (e.target as HTMLSelectElement).value;
+                setFilters({ ...filters, yearFrom: val ? Number(val) : null });
+              }}
+            >
+              <option value="">From</option>
+              {options.years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <span class="filter-year-dash">–</span>
+            <select
+              class="filter-year-select"
+              value={filters.yearTo ?? ""}
+              onChange={(e) => {
+                const val = (e.target as HTMLSelectElement).value;
+                setFilters({ ...filters, yearTo: val ? Number(val) : null });
+              }}
+            >
+              <option value="">To</option>
+              {options.years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
           </div>
         </FilterSection>
       </div>

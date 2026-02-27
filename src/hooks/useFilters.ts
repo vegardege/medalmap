@@ -7,7 +7,8 @@ const EMPTY: FilterState = {
   sports: [],
   categories: [],
   countries: [],
-  years: [],
+  yearFrom: null,
+  yearTo: null,
 };
 
 // Parses a comma-separated URL param into an array, or returns [] if absent.
@@ -24,7 +25,8 @@ function parseFromUrl(): FilterState {
     sports: parseList(p, "sports"),
     categories: parseList(p, "categories") as FilterState["categories"],
     countries: parseList(p, "countries"),
-    years: parseList(p, "years").map(Number).filter(Boolean) as number[],
+    yearFrom: p.get("yearFrom") ? Number(p.get("yearFrom")) : null,
+    yearTo: p.get("yearTo") ? Number(p.get("yearTo")) : null,
   };
 }
 
@@ -37,7 +39,8 @@ function serializeToUrl(filters: FilterState): void {
     p.set("categories", filters.categories.join(","));
   if (filters.countries.length > 0)
     p.set("countries", filters.countries.join(","));
-  if (filters.years.length > 0) p.set("years", filters.years.join(","));
+  if (filters.yearFrom !== null) p.set("yearFrom", String(filters.yearFrom));
+  if (filters.yearTo !== null) p.set("yearTo", String(filters.yearTo));
   const search = p.toString();
   history.replaceState(
     null,
@@ -60,13 +63,10 @@ export function useFilters() {
 
   const activeCount =
     (filters.query ? 1 : 0) +
-    [
-      filters.medals,
-      filters.sports,
-      filters.categories,
-      filters.countries,
-      filters.years,
-    ].filter((arr) => arr.length > 0).length;
+    [filters.medals, filters.sports, filters.categories, filters.countries].filter(
+      (arr) => arr.length > 0,
+    ).length +
+    (filters.yearFrom !== null || filters.yearTo !== null ? 1 : 0);
 
   return { filters, setFilters: setFiltersRaw, clearFilters, activeCount };
 }

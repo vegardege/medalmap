@@ -72,7 +72,9 @@ export function filterAthletes(
           !filters.countries.includes(medal.country)
         )
           return false;
-        if (filters.years.length > 0 && !filters.years.includes(medal.year))
+        if (filters.yearFrom !== null && medal.year < filters.yearFrom)
+          return false;
+        if (filters.yearTo !== null && medal.year > filters.yearTo)
           return false;
 
         if (tokens.length > 0) {
