@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import type { FilterState } from "../types";
 
 const EMPTY: FilterState = {
+  query: "",
   medals: [],
   sports: [],
   categories: [],
@@ -18,6 +19,7 @@ function parseList(params: URLSearchParams, key: string): string[] {
 function parseFromUrl(): FilterState {
   const p = new URLSearchParams(window.location.search);
   return {
+    query: p.get("q") ?? "",
     medals: parseList(p, "medals") as FilterState["medals"],
     sports: parseList(p, "sports"),
     categories: parseList(p, "categories") as FilterState["categories"],
@@ -28,6 +30,7 @@ function parseFromUrl(): FilterState {
 
 function serializeToUrl(filters: FilterState): void {
   const p = new URLSearchParams();
+  if (filters.query) p.set("q", filters.query);
   if (filters.medals.length > 0) p.set("medals", filters.medals.join(","));
   if (filters.sports.length > 0) p.set("sports", filters.sports.join(","));
   if (filters.categories.length > 0)
@@ -55,9 +58,15 @@ export function useFilters() {
     setFiltersRaw(EMPTY);
   }, []);
 
-  const activeCount = Object.values(filters).filter(
-    (arr) => arr.length > 0,
-  ).length;
+  const activeCount =
+    (filters.query ? 1 : 0) +
+    [
+      filters.medals,
+      filters.sports,
+      filters.categories,
+      filters.countries,
+      filters.years,
+    ].filter((arr) => arr.length > 0).length;
 
   return { filters, setFilters: setFiltersRaw, clearFilters, activeCount };
 }

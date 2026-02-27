@@ -27,6 +27,7 @@ export interface Location {
 
 // Active filter state — empty array means "all selected" (no restriction)
 export interface FilterState {
+  query: string;
   medals: Array<"gold" | "silver" | "bronze">;
   sports: string[];
   categories: Array<"men" | "women" | "mixed">;
