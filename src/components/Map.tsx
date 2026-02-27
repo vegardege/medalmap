@@ -177,6 +177,7 @@ export function MapView({ locations }: Props) {
             "bronze-cluster",
           ],
           "icon-allow-overlap": true,
+          "text-allow-overlap": true,
           "text-field": ["get", "totalAthletes"],
           "text-size": 11,
           "text-font": ["Noto Sans Bold"],
