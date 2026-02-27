@@ -32,5 +32,6 @@ export interface FilterState {
   sports: string[];
   categories: Array<"men" | "women" | "mixed">;
   countries: string[];
-  years: number[];
+  yearFrom: number | null;
+  yearTo: number | null;
 }
