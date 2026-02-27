@@ -123,23 +123,36 @@ function parseMedalCell(
       }
     }
   } else {
-    // Individual (athlete-first): strict [athlete, country] pairs
-    for (let i = 0; i < items.length; i += 2) {
-      const athlete = items[i];
-      const country = items[i + 1];
-      if (athlete?.kind !== "athlete" || country?.kind !== "country") {
-        throw new Error(`Unexpected format: ${JSON.stringify(items)}`);
+    // Athlete-first: one or more athletes followed by their country.
+    // Handles individual ([athlete, country]), pairs ([athlete, athlete, country]),
+    // and ties ([athlete, country, athlete, country]).
+    let pending: Array<{ id: string; name: string }> = [];
+    for (const item of items) {
+      if (item.kind === "athlete") {
+        pending.push({ id: item.id, name: item.name });
+      } else {
+        if (pending.length === 0) {
+          throw new Error(
+            `Country before any athlete: ${JSON.stringify(items)}`,
+          );
+        }
+        for (const athlete of pending) {
+          results.push({
+            id: athlete.id,
+            name: athlete.name,
+            year,
+            sport,
+            event,
+            category,
+            medal,
+            country: item.name,
+          });
+        }
+        pending = [];
       }
-      results.push({
-        id: athlete.id,
-        name: athlete.name,
-        year,
-        sport,
-        event,
-        category,
-        medal,
-        country: country.name,
-      });
+    }
+    if (pending.length > 0) {
+      throw new Error(`Athletes without a country: ${JSON.stringify(pending)}`);
     }
   }
   return results;
