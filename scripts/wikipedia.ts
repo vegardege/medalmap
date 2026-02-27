@@ -179,6 +179,11 @@ function parseEventName(cell: HTMLElement): string {
 // category is non-null when a Men's/Women's/Mixed heading was seen before this
 // table. When null (sport has no sub-headings), category is derived per row
 // from the event name.
+//
+// Handles rowspan ties: when two athletes share a medal, Wikipedia uses
+// rowspan="2" on the event cell and on the uncontested medal cells, placing
+// the second tied athlete in a continuation <tr> with only that one <td>.
+// The event cell may be a <th scope="row"> or a plain <td>.
 function parseTable(
   table: HTMLElement,
   year: number,
@@ -186,10 +191,39 @@ function parseTable(
   category: "men" | "women" | "mixed" | null,
 ): WikipediaEntry[] {
   const results: WikipediaEntry[] = [];
+
+  // Rowspan continuation state: when an event cell spans multiple rows, the
+  // non-rowspanned medal slots need filling from subsequent rows.
+  let pendingEvent = "";
+  let pendingRowCategory: "men" | "women" | "mixed" = "mixed";
+  let pendingRowsLeft = 0;
+  let pendingFreeSlots: number[] = []; // medal indices (0=gold,1=silver,2=bronze) not rowspanned
+
   for (const row of table.querySelectorAll("tbody tr")) {
     const cells = row.querySelectorAll("td");
-    // Event cell is either <th scope="row"> or the first <td>
     const eventTh = row.querySelector("th[scope='row']");
+
+    if (pendingRowsLeft > 0 && !eventTh) {
+      // Continuation row: fills the non-rowspanned medal slots in order.
+      pendingRowsLeft--;
+      for (let i = 0; i < pendingFreeSlots.length && i < cells.length; i++) {
+        const slot = pendingFreeSlots[i]!;
+        results.push(
+          ...parseMedalCell(
+            cells[i]!,
+            year,
+            sport,
+            pendingEvent,
+            pendingRowCategory,
+            MEDAL_TYPES[slot]!,
+          ),
+        );
+      }
+      continue;
+    }
+
+    // Event cell is <th scope="row"> (medal cells start at td[0])
+    // or the first <td> (medal cells start at td[1]).
     const eventCell = eventTh ?? cells[0];
     const medalOffset = eventTh ? 0 : 1;
     if (!eventCell || cells.length < medalOffset + 3) continue;
@@ -197,10 +231,12 @@ function parseTable(
     const event = parseEventName(eventCell);
     const rowCategory = category ?? categoryFromEventName(event);
 
+    const freeSlots: number[] = [];
     for (let i = 0; i < 3; i++) {
+      const cell = cells[medalOffset + i]!;
       results.push(
         ...parseMedalCell(
-          cells[medalOffset + i]!,
+          cell,
           year,
           sport,
           event,
@@ -208,6 +244,19 @@ function parseTable(
           MEDAL_TYPES[i]!,
         ),
       );
+      if (parseInt(cell.getAttribute("rowspan") ?? "1", 10) === 1) {
+        freeSlots.push(i);
+      }
+    }
+
+    const eventRowspan = parseInt(eventCell.getAttribute("rowspan") ?? "1", 10);
+    if (eventRowspan > 1) {
+      pendingEvent = event;
+      pendingRowCategory = rowCategory;
+      pendingRowsLeft = eventRowspan - 1;
+      pendingFreeSlots = freeSlots;
+    } else {
+      pendingRowsLeft = 0;
     }
   }
   return results;
