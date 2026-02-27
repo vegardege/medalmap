@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
 import { toggleItem } from "../data";
+import { WINTER_OLYMPICS_BY_YEAR } from "../olympics";
 import type { FilterState } from "../types";
 import { FilterSection } from "./FilterSection";
 import { InfoModal } from "./InfoModal";
@@ -181,7 +182,7 @@ export function FilterPanel({
                   })
                 }
               >
-                {y}
+                {y} {WINTER_OLYMPICS_BY_YEAR.get(y)?.city}
               </button>
             ))}
           </div>

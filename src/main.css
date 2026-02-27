@@ -45,7 +45,7 @@ body {
   border-radius: var(--radius);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   padding: 12px 0 4px;
-  width: 280px;
+  width: 300px;
 }
 
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
@@ -156,6 +156,19 @@ body {
   opacity: 0.6;
   min-width: 2.5rem;
   text-align: center;
+}
+
+.popup-year-group + .popup-year-group {
+  margin-top: 6px;
+}
+
+.popup-year-header {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.45;
+  text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .popup-medal {
@@ -404,7 +417,7 @@ a.missing-card:hover {
 /* ── Filter panel ──────────────────────────────────────────── */
 
 .filter-sidebar {
-  width: 280px;
+  width: 300px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
