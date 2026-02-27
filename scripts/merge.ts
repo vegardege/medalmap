@@ -8,17 +8,17 @@ const OVERRIDES_PATH = "data/overrides.json";
 
 // Capitalizes the first letter of each word, including after hyphens.
 function toTitleCase(s: string): string {
-  return s.replace(/(^|[\s-])([a-z])/g, (_, sep, c) => sep + c.toUpperCase())
+  return s.replace(/(^|[\s-])([a-z])/g, (_, sep, c) => sep + c.toUpperCase());
 }
 
 // Applied after title-casing to resolve any remaining name variants.
 const SPORT_ALIASES: Record<string, string> = {
   "Short Track Speed Skating": "Short-Track Speed Skating",
-}
+};
 
 function normalizeSport(sport: string): string {
-  const titled = toTitleCase(sport)
-  return SPORT_ALIASES[titled] ?? titled
+  const titled = toTitleCase(sport);
+  return SPORT_ALIASES[titled] ?? titled;
 }
 
 // Partial override for an athlete. Include only the fields you want to change.

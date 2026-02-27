@@ -31,7 +31,6 @@ export interface FilterState {
   medals: Array<"gold" | "silver" | "bronze">;
   sports: string[];
   categories: Array<"men" | "women" | "mixed">;
-  countries: string[];
   yearFrom: number | null;
   yearTo: number | null;
 }

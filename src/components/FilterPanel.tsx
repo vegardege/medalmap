@@ -7,7 +7,6 @@ import { MissingDataModal } from "./MissingDataModal";
 
 interface Options {
   sports: string[];
-  countries: string[];
   years: number[];
 }
 
@@ -148,26 +147,6 @@ export function FilterPanel({
                 }
               >
                 {s}
-              </button>
-            ))}
-          </div>
-        </FilterSection>
-
-        <FilterSection title="Country">
-          <div class="filter-list">
-            {options.countries.map((c) => (
-              <button
-                key={c}
-                type="button"
-                class={`filter-row${filters.countries.includes(c) ? " active" : ""}`}
-                onClick={() =>
-                  setFilters({
-                    ...filters,
-                    countries: toggleItem(filters.countries, c),
-                  })
-                }
-              >
-                {c}
               </button>
             ))}
           </div>

@@ -6,7 +6,6 @@ const EMPTY: FilterState = {
   medals: [],
   sports: [],
   categories: [],
-  countries: [],
   yearFrom: null,
   yearTo: null,
 };
@@ -24,7 +23,6 @@ function parseFromUrl(): FilterState {
     medals: parseList(p, "medals") as FilterState["medals"],
     sports: parseList(p, "sports"),
     categories: parseList(p, "categories") as FilterState["categories"],
-    countries: parseList(p, "countries"),
     yearFrom: p.get("yearFrom") ? Number(p.get("yearFrom")) : null,
     yearTo: p.get("yearTo") ? Number(p.get("yearTo")) : null,
   };
@@ -37,8 +35,6 @@ function serializeToUrl(filters: FilterState): void {
   if (filters.sports.length > 0) p.set("sports", filters.sports.join(","));
   if (filters.categories.length > 0)
     p.set("categories", filters.categories.join(","));
-  if (filters.countries.length > 0)
-    p.set("countries", filters.countries.join(","));
   if (filters.yearFrom !== null) p.set("yearFrom", String(filters.yearFrom));
   if (filters.yearTo !== null) p.set("yearTo", String(filters.yearTo));
   const search = p.toString();
@@ -63,7 +59,7 @@ export function useFilters() {
 
   const activeCount =
     (filters.query ? 1 : 0) +
-    [filters.medals, filters.sports, filters.categories, filters.countries].filter(
+    [filters.medals, filters.sports, filters.categories].filter(
       (arr) => arr.length > 0,
     ).length +
     (filters.yearFrom !== null || filters.yearTo !== null ? 1 : 0);
