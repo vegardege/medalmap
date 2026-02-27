@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { WikipediaEntry } from "./wikipedia.ts";
 
@@ -124,36 +124,86 @@ async function queryBatch(ids: string[]): Promise<WikidataEntry[]> {
   );
 }
 
+// An athlete has full data when all three fields are populated.
+// Only these are skipped in incremental mode; everything else is re-fetched.
+function hasFullData(entry: WikidataEntry): boolean {
+  return (
+    entry.wikidataId !== null &&
+    entry.birthPlace !== null &&
+    entry.birthCoords !== null
+  );
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const wikipedia = JSON.parse(
-    readFileSync("data/wikipedia.json", "utf-8"),
-  ) as WikipediaEntry[];
+  const args = process.argv.slice(2);
+  const force = args.includes("--force");
+  const yearArg = args.find((a) => /^\d{4}$/.test(a));
 
-  // One SPARQL round-trip per unique athlete, not per medal entry.
-  const allIds = [...new Set(wikipedia.map((entry) => entry.id))];
-  console.log(`wikidata: ${allIds.length} unique athletes to look up`);
+  // Determine which wikipedia file(s) to read for athlete IDs.
+  const wikipediaPaths = yearArg
+    ? [`data/wikipedia/${yearArg}.json`]
+    : readdirSync("data/wikipedia")
+        .filter((f) => f.endsWith(".json"))
+        .map((f) => `data/wikipedia/${f}`);
 
-  const batches: string[][] = [];
-  for (let i = 0; i < allIds.length; i += BATCH_SIZE) {
-    batches.push(allIds.slice(i, i + BATCH_SIZE));
+  if (wikipediaPaths.length === 0) {
+    throw new Error(
+      "No data/wikipedia/*.json files found — run pipeline:wikipedia first",
+    );
   }
 
-  const results: WikidataEntry[] = [];
+  // Collect unique athlete IDs from the selected year(s).
+  const scopeIds = new Set<string>();
+  for (const path of wikipediaPaths) {
+    const entries = JSON.parse(readFileSync(path, "utf-8")) as WikipediaEntry[];
+    for (const e of entries) scopeIds.add(e.id);
+  }
+
+  // Load all existing wikidata entries (all years) to preserve them on write.
+  const existing = new Map<string, WikidataEntry>();
+  if (!force && existsSync("data/wikidata.json")) {
+    const prev = JSON.parse(
+      readFileSync("data/wikidata.json", "utf-8"),
+    ) as WikidataEntry[];
+    for (const e of prev) existing.set(e.id, e);
+  }
+
+  // Only fetch IDs in scope that lack full data.
+  const toFetch = [...scopeIds].filter((id) => {
+    const e = existing.get(id);
+    return !e || !hasFullData(e);
+  });
+
+  const scope = yearArg ? `year ${yearArg}` : "all years";
+  console.log(
+    `wikidata: ${scopeIds.size} athletes in scope (${scope}), ${toFetch.length} to fetch`,
+  );
+
+  const batches: string[][] = [];
+  for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
+    batches.push(toFetch.slice(i, i + BATCH_SIZE));
+  }
+
+  const fetched: WikidataEntry[] = [];
   for (let i = 0; i < batches.length; i++) {
     const batch = batches[i]!;
     console.log(
       `  Batch ${i + 1}/${batches.length} (${batch.length} athletes)…`,
     );
-    results.push(...(await queryBatch(batch)));
+    fetched.push(...(await queryBatch(batch)));
     if (i < batches.length - 1) await sleep(BATCH_DELAY_MS);
   }
 
-  const withCoords = results.filter((r) => r.birthCoords !== null).length;
-  const withPlace = results.filter((r) => r.birthPlace !== null).length;
+  // Merge fetched results into the existing map (other years untouched).
+  for (const e of fetched) existing.set(e.id, e);
+
+  const all = [...existing.values()];
+  const withCoords = all.filter((r) => r.birthCoords !== null).length;
+  const withPlace = all.filter((r) => r.birthPlace !== null).length;
   console.log(
-    `wikidata: ${withCoords}/${results.length} have coordinates, ${withPlace}/${results.length} have birth place name`,
+    `wikidata: ${withCoords}/${all.length} have coordinates, ${withPlace}/${all.length} have birth place name`,
   );
 
-  writeFileSync("data/wikidata.json", JSON.stringify(results, null, 2));
+  writeFileSync("data/wikidata.json", JSON.stringify(all, null, 2));
   console.log("Written to data/wikidata.json");
 }

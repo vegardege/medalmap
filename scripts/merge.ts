@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Athlete, Medal } from "../src/types.ts";
 import type { WikidataEntry } from "./wikidata.ts";
@@ -38,10 +38,26 @@ function requireJson<T>(path: string, hint: string): T {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const wikipedia = requireJson<WikipediaEntry[]>(
-    "data/wikipedia.json",
-    "npm run pipeline:wikipedia",
-  );
+  const wikipediaDir = "data/wikipedia";
+  if (
+    !existsSync(wikipediaDir) ||
+    readdirSync(wikipediaDir).filter((f) => f.endsWith(".json")).length === 0
+  ) {
+    throw new Error(
+      `${wikipediaDir}/ is empty or missing — run npm run pipeline:wikipedia first`,
+    );
+  }
+
+  const wikipedia: WikipediaEntry[] = readdirSync(wikipediaDir)
+    .filter((f) => f.endsWith(".json"))
+    .sort()
+    .flatMap(
+      (f) =>
+        JSON.parse(
+          readFileSync(`${wikipediaDir}/${f}`, "utf-8"),
+        ) as WikipediaEntry[],
+    );
+
   const wikidata = requireJson<WikidataEntry[]>(
     "data/wikidata.json",
     "npm run pipeline:wikidata",
@@ -65,7 +81,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // Warn about override ids not present in wikipedia — likely a typo.
   for (const { id } of overrides) {
     if (!entriesById.has(id)) {
-      console.warn(`merge: override id "${id}" not found in wikipedia.json`);
+      console.warn(
+        `merge: override id "${id}" not found in any wikipedia/*.json`,
+      );
     }
   }
 

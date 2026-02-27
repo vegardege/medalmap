@@ -1,7 +1,8 @@
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { HTMLElement } from "node-html-parser";
 import { NodeType, parse } from "node-html-parser";
+import { WINTER_OLYMPIC_YEARS } from "../src/olympics.ts";
 
 const MEDAL_TYPES = ["gold", "silver", "bronze"] as const;
 
@@ -252,17 +253,29 @@ export function parseWikipediaPage(
 
 // Run as CLI when executed directly; skip when imported (e.g. by tests)
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const year = parseInt(process.argv[2] ?? "2026", 10);
-  const url = `https://en.wikipedia.org/wiki/List_of_${year}_Winter_Olympics_medal_winners`;
+  const yearArg = process.argv[2];
+  const years = yearArg ? [parseInt(yearArg, 10)] : WINTER_OLYMPIC_YEARS;
 
-  console.log(`Fetching ${url}`);
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
-  const html = await response.text();
+  mkdirSync("data/wikipedia", { recursive: true });
 
-  const entries = parseWikipediaPage(html, year);
-  console.log(`Found ${entries.length} entries`);
+  for (const year of years) {
+    const url = `https://en.wikipedia.org/wiki/List_of_${year}_Winter_Olympics_medal_winners`;
+    console.log(`Fetching ${url}`);
 
-  writeFileSync("data/wikipedia.json", JSON.stringify(entries, null, 2));
-  console.log("Written to data/wikipedia.json");
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.warn(`  HTTP ${response.status} — skipping ${year}`);
+      continue;
+    }
+
+    const html = await response.text();
+    const entries = parseWikipediaPage(html, year);
+    console.log(`  ${entries.length} entries`);
+
+    writeFileSync(
+      `data/wikipedia/${year}.json`,
+      JSON.stringify(entries, null, 2),
+    );
+    console.log(`  Written to data/wikipedia/${year}.json`);
+  }
 }
