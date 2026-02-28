@@ -196,7 +196,8 @@ export function AthletePopup({
     if (!touch) return;
     const delta = touch.clientX - touchStartX.current;
     touchStartX.current = null;
-    if (delta < -SWIPE_THRESHOLD_PX) setPage((p) => Math.min(p + 1, pageCount - 1));
+    if (delta < -SWIPE_THRESHOLD_PX)
+      setPage((p) => Math.min(p + 1, pageCount - 1));
     if (delta > SWIPE_THRESHOLD_PX) setPage((p) => Math.max(p - 1, 0));
   }
 
