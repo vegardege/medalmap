@@ -271,8 +271,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       let resolved = 0;
       for (const [originalId, canonicalId] of redirectMap) {
         const result = byCanonical.get(canonicalId);
-        if (result?.wikidataId !== null) {
-          existing.set(originalId, { ...result!, id: originalId });
+        if (result != null && result.wikidataId !== null) {
+          existing.set(originalId, { ...result, id: originalId });
           resolved++;
         }
       }

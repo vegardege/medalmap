@@ -114,7 +114,7 @@ export function MapView({ locations }: Props) {
         type: "geojson",
         data: toGeoJSON(locationsRef.current),
         cluster: true,
-        clusterRadius: 20,
+        clusterRadius: 35,
         clusterMaxZoom: 14,
         clusterProperties: {
           hasGold: ["+", ["case", ["==", ["get", "bestMedal"], "gold"], 1, 0]],
@@ -215,14 +215,26 @@ export function MapView({ locations }: Props) {
         // Pan the map so the popup is fully visible within the container.
         const popEl = popupRef.current.getElement();
         if (!popEl) return;
-        const popRect = popEl.getBoundingClientRect();
         const mapRect = map.getContainer().getBoundingClientRect();
         const pad = 8;
 
         // Positive panBy x → camera moves right → content moves left.
         // We want the popup to shift: compute how far each edge overhangs.
-        const leftOverhang = mapRect.left + pad - popRect.left; // > 0 if clipped left
-        const rightOverhang = popRect.right - (mapRect.right - pad); // > 0 if clipped right
+        //
+        // For horizontal extent we derive position from map.project() + offsetWidth
+        // rather than getBoundingClientRect(), because getBoundingClientRect() can
+        // be clamped by the container's overflow:hidden — causing rightOverhang to
+        // read as just `pad` instead of the true overhang, so the pan falls short.
+        // For top/bottom anchors the popup is always centered on the marker horizontally.
+        const popW = popEl.offsetWidth;
+        const popCenterX = mapRect.left + point.x;
+        const leftOverhang = mapRect.left + pad - (popCenterX - popW / 2);
+        const rightOverhang = popCenterX + popW / 2 - (mapRect.right - pad);
+
+        // Vertical: getBoundingClientRect() is reliable here — the anchor choice
+        // ensures the popup opens away from the edge that triggered it, so the
+        // popup's far edge is well inside the container and not overflow-clipped.
+        const popRect = popEl.getBoundingClientRect();
         const topOverhang = mapRect.top + pad - popRect.top; // > 0 if clipped top
         const bottomOverhang = popRect.bottom - (mapRect.bottom - pad); // > 0 if clipped bottom
 
