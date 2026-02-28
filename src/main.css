@@ -357,12 +357,6 @@ a.missing-card:hover {
   margin-top: 4px;
 }
 
-.missing-search-count {
-  font-size: 0.8rem;
-  opacity: 0.5;
-  margin-top: 6px;
-}
-
 .missing-no-results {
   font-size: 0.85rem;
   opacity: 0.5;
@@ -719,8 +713,6 @@ a.missing-card:hover {
   flex-shrink: 0;
 }
 
-/* ── Checkbox lists (sport, country, year) ─────────────────── */
-
 .filter-search {
   width: 100%;
   background: rgba(255, 255, 255, 0.07);
@@ -736,52 +728,6 @@ a.missing-card:hover {
 .filter-search:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.35);
-}
-
-.filter-list {
-  display: flex;
-  flex-direction: column;
-  max-height: 200px;
-  overflow-y: auto;
-  margin: 0 -14px;
-}
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  background: none;
-  border: none;
-  color: inherit;
-  font-family: inherit;
-  font-size: 0.85rem;
-  text-align: left;
-  padding: 7px 14px;
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-.filter-row::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-right: 10px;
-  background: transparent;
-}
-
-.filter-row:hover {
-  background: rgba(255, 255, 255, 0.05);
-  opacity: 1;
-}
-
-.filter-row.active {
-  opacity: 1;
-}
-
-.filter-row.active::before {
-  background: var(--color-gold);
 }
 
 /* ── FAB (mobile only) ─────────────────────────────────────── */
