@@ -5,7 +5,7 @@ import { FilterSection } from "./FilterSection";
 import { InfoModal } from "./InfoModal";
 import { MissingDataModal } from "./MissingDataModal";
 
-interface Options {
+interface FilterOptions {
   sports: string[];
   years: number[];
 }
@@ -16,7 +16,7 @@ interface Props {
   clearFilters: () => void;
   activeCount: number;
   athleteCount: number;
-  options: Options;
+  options: FilterOptions;
 }
 
 export function FilterPanel({
@@ -42,7 +42,7 @@ export function FilterPanel({
           class="filter-clear"
           type="button"
           style={activeCount === 0 ? "visibility: hidden" : ""}
-          onClick={() => clearFilters()}
+          onClick={clearFilters}
         >
           Clear
         </button>
@@ -240,7 +240,7 @@ export function FilterPanel({
           viewBox="0 0 24 24"
           width="22"
           height="22"
-          fill="currentColor"
+          fill="none"
           aria-hidden="true"
         >
           <path
@@ -248,7 +248,6 @@ export function FilterPanel({
             stroke="currentColor"
             stroke-width="2"
             stroke-linecap="round"
-            fill="none"
           />
         </svg>
         {activeCount > 0 && <span class="filter-fab-badge">{activeCount}</span>}

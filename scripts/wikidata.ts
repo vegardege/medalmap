@@ -68,7 +68,7 @@ async function queryBatch(ids: string[]): Promise<WikidataEntry[]> {
   url.searchParams.set("query", sparql);
   url.searchParams.set("format", "json");
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(url, {
     headers: {
       "User-Agent": USER_AGENT,
       Accept: "application/sparql-results+json",

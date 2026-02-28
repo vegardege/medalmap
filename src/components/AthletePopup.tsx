@@ -1,5 +1,5 @@
 import { useRef, useState } from "preact/hooks";
-import { getSport } from "../data";
+import { formatSports } from "../data";
 import { WINTER_OLYMPICS_BY_YEAR } from "../olympics";
 import type { Athlete, Location } from "../types";
 
@@ -92,7 +92,7 @@ function AthleteRow({
     <div class="popup-athlete" onClick={onSelect}>
       <div class="popup-name">{athlete.name}</div>
       <div class="popup-sport">
-        {getSport(athlete)} {yearRange(athlete.medals)}
+        {formatSports(athlete)} {yearRange(athlete.medals)}
       </div>
       <div class="popup-medal-strip">
         {medals.map((medal) => (
@@ -127,7 +127,7 @@ function AthleteDetail({
       </button>
       <div class="popup-detail-body">
         <div class="popup-name">{athlete.name}</div>
-        <div class="popup-sport">{getSport(athlete)}</div>
+        <div class="popup-sport">{formatSports(athlete)}</div>
         <div class="popup-medals">
           {groups.map(({ year, label, medals }) => (
             <div key={year} class="popup-year-group">
@@ -142,7 +142,7 @@ function AthleteDetail({
         </div>
         <div class="popup-links">
           <a
-            class="popup-wiki"
+            class="popup-link"
             href={wikiUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -151,7 +151,7 @@ function AthleteDetail({
           </a>
           {wikidataUrl && (
             <a
-              class="popup-wiki"
+              class="popup-link"
               href={wikidataUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -166,6 +166,7 @@ function AthleteDetail({
 }
 
 const PAGE_SIZE = 3;
+const SWIPE_THRESHOLD_PX = 40;
 
 export function AthletePopup({
   location,
@@ -195,8 +196,8 @@ export function AthletePopup({
     if (!touch) return;
     const delta = touch.clientX - touchStartX.current;
     touchStartX.current = null;
-    if (delta < -40) setPage((p) => Math.min(p + 1, pageCount - 1));
-    if (delta > 40) setPage((p) => Math.max(p - 1, 0));
+    if (delta < -SWIPE_THRESHOLD_PX) setPage((p) => Math.min(p + 1, pageCount - 1));
+    if (delta > SWIPE_THRESHOLD_PX) setPage((p) => Math.max(p - 1, 0));
   }
 
   if (selected) {

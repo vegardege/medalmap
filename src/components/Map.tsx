@@ -10,6 +10,20 @@ interface Props {
   locations: Location[];
 }
 
+// Default map view — full world view, centered slightly north to give
+// Initial map view
+const DEFAULT_CENTER: [number, number] = [10, 40];
+const DEFAULT_ZOOM = 1.2;
+
+// Cluster tuning
+const CLUSTER_RADIUS = 35; // px — merge nearby points within this screen radius
+const CLUSTER_MAX_ZOOM = 14; // stop clustering above this zoom level
+const CLUSTER_ICON_SIZE = 30; // px — width/height of cluster bubble SVGs
+
+// Popup anchor: use "top" (popup opens downward) when the marker is in the
+// upper portion of the canvas, so the popup doesn't open off the top edge.
+const ANCHOR_THRESHOLD = 0.45;
+
 function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
@@ -29,7 +43,8 @@ function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
 // Plain filled circle — the count text sits where the inner dot would be
 
 function makeClusterSVG(color: string): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+  const size = CLUSTER_ICON_SIZE;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
     <circle cx="15" cy="15" r="13" fill="${color}" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
   </svg>`;
 }
@@ -83,8 +98,8 @@ export function MapView({ locations }: Props) {
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://tiles.openfreemap.org/styles/liberty",
-      center: [10, 20],
-      zoom: 2,
+      center: DEFAULT_CENTER,
+      zoom: DEFAULT_ZOOM,
     });
 
     map.addControl(new maplibregl.NavigationControl(), "top-right");
@@ -104,8 +119,8 @@ export function MapView({ locations }: Props) {
             map,
             `${medal}-cluster`,
             makeClusterSVG(MEDAL_COLORS[medal]),
-            30,
-            30,
+            CLUSTER_ICON_SIZE,
+            CLUSTER_ICON_SIZE,
           ),
         ),
       );
@@ -114,8 +129,8 @@ export function MapView({ locations }: Props) {
         type: "geojson",
         data: toGeoJSON(locationsRef.current),
         cluster: true,
-        clusterRadius: 35,
-        clusterMaxZoom: 14,
+        clusterRadius: CLUSTER_RADIUS,
+        clusterMaxZoom: CLUSTER_MAX_ZOOM,
         clusterProperties: {
           hasGold: ["+", ["case", ["==", ["get", "bestMedal"], "gold"], 1, 0]],
           hasSilver: [
@@ -205,7 +220,7 @@ export function MapView({ locations }: Props) {
         const point = map.project(coords);
         const canvasH = map.getContainer().clientHeight;
         const anchor: NonNullable<maplibregl.PopupOptions["anchor"]> =
-          point.y < canvasH * 0.45 ? "top" : "bottom";
+          point.y < canvasH * ANCHOR_THRESHOLD ? "top" : "bottom";
 
         popupRef.current = new maplibregl.Popup({ maxWidth: "300px", anchor })
           .setLngLat(coords)

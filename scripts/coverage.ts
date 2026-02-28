@@ -96,12 +96,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const bySport = new Map<string, RowStats>();
     for (const athlete of athletes) {
       for (const medal of athlete.medals) {
-        let s = bySport.get(medal.sport);
-        if (!s) {
-          s = newRow();
-          bySport.set(medal.sport, s);
+        let row = bySport.get(medal.sport);
+        if (!row) {
+          row = newRow();
+          bySport.set(medal.sport, row);
         }
-        addMedal(s, athlete, medal);
+        addMedal(row, athlete, medal);
       }
     }
 
@@ -117,7 +117,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
     const rows: [string, RowStats][] = [...bySport.keys()]
       .sort()
-      .map((s) => [s, bySport.get(s)!]);
+      .map((sport) => [sport, bySport.get(sport)!]);
     printTable("Sport", rows);
     console.log();
     console.log(
@@ -129,12 +129,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const byYear = new Map<number, RowStats>();
     for (const athlete of all) {
       for (const medal of athlete.medals) {
-        let y = byYear.get(medal.year);
-        if (!y) {
-          y = newRow();
-          byYear.set(medal.year, y);
+        let row = byYear.get(medal.year);
+        if (!row) {
+          row = newRow();
+          byYear.set(medal.year, row);
         }
-        addMedal(y, athlete, medal);
+        addMedal(row, athlete, medal);
       }
     }
 

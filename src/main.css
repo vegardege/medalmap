@@ -208,7 +208,7 @@ body {
   margin-top: 16px;
 }
 
-.popup-wiki {
+.popup-link {
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
@@ -340,6 +340,7 @@ a.missing-card:hover {
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
@@ -391,7 +392,7 @@ a.missing-card:hover {
 
 .filter-sidebar-toggle,
 .filter-clear,
-.popup-wiki {
+.popup-link {
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 4px;
@@ -404,7 +405,7 @@ a.missing-card:hover {
 
 .filter-sidebar-toggle:hover,
 .filter-clear:hover,
-.popup-wiki:hover {
+.popup-link:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 

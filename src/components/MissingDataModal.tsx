@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { allAthletes, getSport } from "../data";
+import { allAthletes, formatSports } from "../data";
 import type { Athlete } from "../types";
 
 interface Props {
@@ -31,7 +31,7 @@ function matchesSearch(athlete: Athlete, tokens: string[]): boolean {
 const missing = allAthletes.filter((a) => a.birthCoords === null);
 
 function AthleteCard({ athlete }: { athlete: Athlete }) {
-  const sport = getSport(athlete);
+  const sport = formatSports(athlete);
   const wdUrl = athlete.wikidataId
     ? `https://www.wikidata.org/wiki/${athlete.wikidataId}`
     : null;

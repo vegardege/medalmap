@@ -51,9 +51,9 @@ export function filterAthletes(
 
   return athletes
     .map((athlete) => {
-      const nameLower = athlete.name.toLowerCase();
-      const birthLower = (athlete.birthPlace ?? "").toLowerCase();
-
+      const nameLower = tokens.length > 0 ? athlete.name.toLowerCase() : "";
+      const birthLower =
+        tokens.length > 0 ? (athlete.birthPlace ?? "").toLowerCase() : "";
       const matchingMedals = athlete.medals.filter((medal) => {
         if (filters.medals.length > 0 && !filters.medals.includes(medal.medal))
           return false;
@@ -100,7 +100,7 @@ export function filterAthletes(
 }
 
 // Returns a deduplicated, joined list of sports for an athlete.
-export function getSport(athlete: Athlete): string {
+export function formatSports(athlete: Athlete): string {
   return [...new Set(athlete.medals.map((m) => m.sport))].join(" · ");
 }
 
