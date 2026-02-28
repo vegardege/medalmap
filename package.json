@@ -1,14 +1,16 @@
 {
   "name": "medalmap",
   "version": "1.0.0",
-  "description": "Web app showing were Olympic medalists were born.",
+  "description": "Web app showing where Olympic medalists were born.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "check": "biome check .",
     "check:fix": "biome check --write .",
+    "typecheck": "tsc",
     "test": "vitest",
+    "test:run": "vitest run",
     "pipeline:wikipedia": "tsx scripts/wikipedia.ts",
     "pipeline:wikidata": "tsx scripts/wikidata.ts",
     "pipeline:coverage": "tsx scripts/coverage.ts",
@@ -25,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/vegardege/medalmap/issues"
   },
-  "homepage": "https://github.com/vegardege/medalmap#readme",
+  "homepage": "https://medalmap.pebblepatch.dev",
   "dependencies": {
     "maplibre-gl": "^5.19.0",
     "preact": "^10.28.4"
