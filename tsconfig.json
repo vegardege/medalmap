@@ -23,7 +23,6 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "isolatedModules": true,
     "noEmit": true,
     "types": ["vitest/globals", "node"]
   },
