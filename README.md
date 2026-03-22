@@ -4,7 +4,11 @@
 
 Interactive map showing where Winter Olympic medalists were born.
 
-**Live site**: [medalmap.pebblepatch.dev](https://medalmap.pebblepatch.dev)
+**Live Demo**: https://medalmap.pebblepatch.dev/
+
+## Screenshot
+
+![Web site screenshot](assets/medalmap.png)
 
 ## Pipelines
 
