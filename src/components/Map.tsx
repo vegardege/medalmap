@@ -1,3 +1,4 @@
+import type { FeatureCollection, Point } from "geojson";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { render } from "preact";
@@ -24,7 +25,7 @@ const CLUSTER_ICON_SIZE = 30; // px — width/height of cluster bubble SVGs
 // upper portion of the canvas, so the popup doesn't open off the top edge.
 const ANCHOR_THRESHOLD = 0.45;
 
-function toGeoJSON(locations: Location[]): GeoJSON.FeatureCollection {
+function toGeoJSON(locations: Location[]): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: locations.map((loc) => ({
@@ -274,7 +275,7 @@ export function MapView({ locations }: Props) {
       map.on("click", "marker-bullseye", (e) => {
         const feature = e.features?.[0];
         if (!feature) return;
-        const coords = (feature.geometry as GeoJSON.Point).coordinates as [
+        const coords = (feature.geometry as Point).coordinates as [
           number,
           number,
         ];
@@ -289,7 +290,7 @@ export function MapView({ locations }: Props) {
         if (!feature?.properties) return;
         const clusterId = feature.properties["cluster_id"] as number;
         const pointCount = feature.properties["point_count"] as number;
-        const coords = (feature.geometry as GeoJSON.Point).coordinates as [
+        const coords = (feature.geometry as Point).coordinates as [
           number,
           number,
         ];
