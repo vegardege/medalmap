@@ -1,11 +1,16 @@
 import type { FeatureCollection, Point } from "geojson";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { bestMedal } from "../data";
 import type { Location } from "../types";
 import { AthletePopup } from "./AthletePopup";
+
+// MapLibre 6 resolves its worker relative to import.meta.url, which breaks
+// once bundled — point it at the worker file Vite emits instead.
+maplibregl.setWorkerUrl(workerUrl);
 
 interface Props {
   locations: Location[];

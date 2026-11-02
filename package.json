@@ -25,7 +25,7 @@
     "pipeline:merge": "tsx scripts/merge.ts"
   },
   "dependencies": {
-    "maplibre-gl": "^5.20.2",
+    "maplibre-gl": "^6.16.0",
     "preact": "^11.1.1"
   },
   "devDependencies": {
