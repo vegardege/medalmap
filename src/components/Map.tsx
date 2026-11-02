@@ -255,17 +255,8 @@ export function MapView({ locations }: Props) {
         const bottomOverhang = popRect.bottom - (mapRect.bottom - pad); // > 0 if clipped bottom
 
         const dx =
-          leftOverhang > 0
-            ? -leftOverhang
-            : rightOverhang > 0
-              ? rightOverhang
-              : 0;
-        const dy =
-          topOverhang > 0
-            ? -topOverhang
-            : bottomOverhang > 0
-              ? bottomOverhang
-              : 0;
+          leftOverhang > 0 ? -leftOverhang : Math.max(rightOverhang, 0);
+        const dy = topOverhang > 0 ? -topOverhang : Math.max(bottomOverhang, 0);
 
         if (dx !== 0 || dy !== 0) {
           map.panBy([dx, dy], { duration: 250 });
