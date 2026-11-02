@@ -6,7 +6,6 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "baseUrl": "./",
     "paths": {
       "react": ["./node_modules/preact/compat/"],
       "react/jsx-runtime": ["./node_modules/preact/jsx-runtime"],
@@ -24,7 +23,7 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["vitest/globals", "node"]
+    "types": ["vite/client", "vitest/globals", "node"]
   },
   "include": ["src", "scripts", "tests"],
   "exclude": ["node_modules", "dist"]
